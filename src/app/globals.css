@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  /* Palet UnhasCorner (dari PRD & design system Stitch) */
+  --color-primary: #800000;
+  --color-primary-hover: #600000;
+  --color-primary-dark: #570000;
+  --color-primary-soft: #f8e8e8;
+  --color-accent: #c5a059;
+  --color-accent-soft: #fbf3e0;
+  --color-base: #f9fafb;
+  --color-ink: #1f2937;
+  --color-muted: #6b7280;
+  --color-line: #e5e7eb;
+
+  --color-status-pending-bg: #fef3c7;
+  --color-status-pending-text: #b45309;
+  --color-status-processing-bg: #dbeafe;
+  --color-status-processing-text: #1d4ed8;
+  --color-status-shipping-bg: #e0e7ff;
+  --color-status-shipping-text: #4338ca;
+  --color-status-success-bg: #dcfce7;
+  --color-status-success-text: #15803d;
+  --color-status-danger-bg: #fee2e2;
+  --color-status-danger-text: #b91c1c;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-base);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+}
+
+/* Komponen yang dipakai berulang (di layer components agar bisa ditimpa utility class) */
+@layer components {
+  .input {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    background: #fff;
+    border-radius: 0.5rem;
+    padding: 0.55rem 0.8rem;
+    font-size: 0.875rem;
+    outline: none;
+  }
+  .input:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgb(128 0 0 / 0.12);
+  }
+  .label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: background 0.15s, color 0.15s;
+    cursor: pointer;
+  }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .btn-primary { background: var(--color-primary); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+  .btn-outline { border: 1px solid var(--color-primary); color: var(--color-primary); background: transparent; }
+  .btn-outline:hover:not(:disabled) { background: var(--color-primary-soft); }
+  .btn-danger { background: #fff; border: 1px solid #fca5a5; color: #b91c1c; }
+  .btn-danger:hover:not(:disabled) { background: #fee2e2; }
+  .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.75rem; }
+  .card {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+  }
 }
