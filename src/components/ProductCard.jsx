@@ -57,7 +57,7 @@ export default function ProductCard({ product, user, wished = false, returnTo = 
             <input type="hidden" name="productId" value={p.id} />
             <input type="hidden" name="quantity" value="1" />
             <input type="hidden" name="returnTo" value={returnTo} />
-            <SubmitButton className="btn btn-outline w-full !py-1.5 text-xs" pendingText="Menambah...">
+            <SubmitButton className="btn btn-outline w-full py-1.5 text-xs" pendingText="Menambah...">
               <ShoppingCart size={14} /> Keranjang
             </SubmitButton>
           </form>
