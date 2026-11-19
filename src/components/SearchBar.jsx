@@ -14,7 +14,6 @@ export default function SearchBar() {
   // Pencarian instan (debounce 250 ms) ke route handler /api/products
   useEffect(() => {
     if (q.trim().length < 2) {
-      setResults([]);
       return;
     }
     const t = setTimeout(async () => {
@@ -50,10 +49,18 @@ export default function SearchBar() {
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
         <input
           value={q}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            setQ(val);
+            if (val.trim().length < 2) {
+              setResults([]);
+              setOpen(false);
+            }
+          }}
           onFocus={() => results.length && setOpen(true)}
           placeholder="Cari jas almamater, kalkulator, lanyard..."
           className="w-full rounded-lg border border-line bg-base py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:bg-white"
+          suppressHydrationWarning
         />
       </form>
       {open && results.length > 0 && (

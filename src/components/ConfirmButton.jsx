@@ -6,6 +6,7 @@ export default function ConfirmButton({ children, message = "Yakin?", className 
     <button
       type="submit"
       className={className}
+      suppressHydrationWarning
       onClick={(e) => {
         if (!confirm(message)) e.preventDefault();
       }}
