@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShoppingCart, Heart, LayoutDashboard, LogOut, User } from "lucide-react";
+import { LuShoppingCart, LuHeart, LuLayoutDashboard, LuLogOut, LuUser } from "react-icons/lu";
 import SearchBar from "@/components/SearchBar";
 import MobileMenu from "@/components/MobileMenu";
 import { getCurrentUser } from "@/lib/auth";
@@ -63,10 +63,10 @@ export default async function Navbar() {
           {user?.role === "buyer" && (
             <>
               <Link href="/buyer/wishlist" aria-label="Wishlist" className="rounded-lg p-2 hover:bg-primary-soft">
-                <Heart size={20} />
+                <LuHeart size={20} />
               </Link>
               <Link href="/keranjang" aria-label="Keranjang" className="relative rounded-lg p-2 hover:bg-primary-soft">
-                <ShoppingCart size={20} />
+                <LuShoppingCart size={20} />
                 {cartCount > 0 && (
                   <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] font-bold text-white">
                     {cartCount}
@@ -74,7 +74,7 @@ export default async function Navbar() {
                 )}
               </Link>
               <Link href="/buyer/dashboard" className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-primary-soft">
-                <User size={16} /> {user.name.split(" ")[0]}
+                <LuUser size={16} /> {user.name.split(" ")[0]}
               </Link>
             </>
           )}
@@ -84,14 +84,14 @@ export default async function Navbar() {
               href={user.role === "admin" ? "/admin/dashboard" : user.seller_status === "approved" ? "/seller/dashboard" : "/seller/pending"}
               className="btn btn-outline"
             >
-              <LayoutDashboard size={16} /> Dashboard
+              <LuLayoutDashboard size={16} /> Dashboard
             </Link>
           )}
 
           {user && (
             <form action={logout}>
               <button aria-label="Keluar" title="Keluar" className="rounded-lg p-2 text-muted hover:bg-status-danger-bg hover:text-status-danger-text">
-                <LogOut size={20} />
+                <LuLogOut size={20} />
               </button>
             </form>
           )}
@@ -100,7 +100,7 @@ export default async function Navbar() {
         <div className="ml-auto flex items-center gap-1 md:hidden">
           {user?.role === "buyer" && (
             <Link href="/keranjang" aria-label="Keranjang" className="relative rounded-lg p-2">
-              <ShoppingCart size={22} />
+              <LuShoppingCart size={22} />
               {cartCount > 0 && (
                 <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] font-bold text-white">
                   {cartCount}

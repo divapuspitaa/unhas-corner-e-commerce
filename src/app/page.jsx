@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Shirt, FlaskConical, GraduationCap, Gift, Store } from "lucide-react";
+import { LuArrowRight, LuShirt, LuFlaskConical, LuGraduationCap, LuGift, LuStore } from "react-icons/lu";
 import ProductCard from "@/components/ProductCard";
 import Notice from "@/components/Notice";
 import { getCurrentUser } from "@/lib/auth";
@@ -7,7 +7,7 @@ import { getCategories, getStores, getWishlistIds, randomProducts } from "@/lib/
 
 export const dynamic = "force-dynamic";
 
-const ICONS = [Shirt, FlaskConical, GraduationCap, Gift];
+const ICONS = [LuShirt, LuFlaskConical, LuGraduationCap, LuGift];
 
 export default async function HomePage({ searchParams }) {
   const sp = await searchParams;
@@ -35,7 +35,7 @@ export default async function HomePage({ searchParams }) {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/produk" className="btn bg-white text-primary hover:bg-primary-soft">
-              Jelajahi Katalog <ArrowRight size={16} />
+              Jelajahi Katalog <LuArrowRight size={16} />
             </Link>
             <Link href="/toko" className="btn border border-white/40 text-white hover:bg-white/10">
               Lihat Toko Mitra
@@ -88,7 +88,7 @@ export default async function HomePage({ searchParams }) {
                   </p>
                   <p className="line-clamp-2 text-sm text-muted">{s.description}</p>
                   <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted">
-                    <Store size={12} /> {s.product_count} produk
+                    <LuStore size={12} /> {s.product_count} produk
                   </p>
                 </div>
               </Link>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Store, Heart, ShoppingCart } from "lucide-react";
+import { LuStore, LuHeart, LuShoppingCart } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
 import SubmitButton from "@/components/SubmitButton";
 import { Tag } from "@/components/Badge";
@@ -29,7 +29,7 @@ export default function ProductCard({ product, user, wished = false, returnTo = 
           <input type="hidden" name="productId" value={p.id} />
           <input type="hidden" name="returnTo" value={returnTo} />
           <button type="submit" aria-label="Wishlist" className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white">
-            <Heart size={16} className={wished ? "fill-primary text-primary" : "text-muted"} />
+            <LuHeart size={16} className={wished ? "fill-primary text-primary" : "text-muted"} />
           </button>
         </form>
       )}
@@ -41,7 +41,7 @@ export default function ProductCard({ product, user, wished = false, returnTo = 
         <p className="text-base font-bold text-primary">{formatRupiah(p.price)}</p>
         <div className="flex items-center justify-between text-xs text-muted">
           <Link href={`/toko/${p.store_id}`} className="inline-flex items-center gap-1 hover:text-primary">
-            <Store size={12} /> {p.store_name}
+            <LuStore size={12} /> {p.store_name}
           </Link>
           <span className="inline-flex items-center gap-1">
             <Stars value={p.avg_rating} size={11} />
@@ -58,7 +58,7 @@ export default function ProductCard({ product, user, wished = false, returnTo = 
             <input type="hidden" name="quantity" value="1" />
             <input type="hidden" name="returnTo" value={returnTo} />
             <SubmitButton className="btn btn-outline w-full py-1.5 text-xs" pendingText="Menambah...">
-              <ShoppingCart size={14} /> Keranjang
+              <LuShoppingCart size={14} /> Keranjang
             </SubmitButton>
           </form>
         )}

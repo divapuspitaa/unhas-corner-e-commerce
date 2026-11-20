@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pencil, Plus } from "lucide-react";
+import { LuPencil, LuPlus } from "react-icons/lu";
 import ConfirmButton from "@/components/ConfirmButton";
 import Notice from "@/components/Notice";
 import SafeImage from "@/components/SafeImage";
@@ -25,7 +25,7 @@ export default async function SellerProductsPage({ searchParams }) {
     <div>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-semibold">Produk Saya ({rows.length})</h2>
-        <Link href="/seller/produk/baru" className="btn btn-primary"><Plus size={16} /> Tambah Produk</Link>
+        <Link href="/seller/produk/baru" className="btn btn-primary"><LuPlus size={16} /> Tambah Produk</Link>
       </div>
       <Notice ok={sp.ok} err={sp.err} />
 
@@ -57,7 +57,7 @@ export default async function SellerProductsPage({ searchParams }) {
                 <td className="p-3">{p.stock}</td>
                 <td className="p-3">
                   <div className="flex justify-end gap-2">
-                    <Link href={`/seller/produk/${p.id}/edit`} className="btn btn-outline btn-sm"><Pencil size={13} /> Edit</Link>
+                    <Link href={`/seller/produk/${p.id}/edit`} className="btn btn-outline btn-sm"><LuPencil size={13} /> Edit</Link>
                     <form action={deleteProduct}>
                       <input type="hidden" name="id" value={p.id} />
                       <ConfirmButton message={`Hapus "${p.name}"?`}>Hapus</ConfirmButton>

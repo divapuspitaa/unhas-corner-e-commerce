@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { LuStar } from "react-icons/lu";
 import SubmitButton from "@/components/SubmitButton";
 import { submitReview } from "@/actions/orders";
 
@@ -14,7 +14,7 @@ export default function ReviewForm({ orderId, productId, initialRating = 0, init
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((i) => (
           <button type="button" key={i} onClick={() => setRating(i)} aria-label={`${i} bintang`} className="text-accent">
-            <Star size={20} fill={i <= rating ? "currentColor" : "none"} />
+            <LuStar size={20} fill={i <= rating ? "currentColor" : "none"} />
           </button>
         ))}
       </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Heart, ShoppingCart, Store } from "lucide-react";
+import { LuHeart, LuShoppingCart, LuStore } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
 import SubmitButton from "@/components/SubmitButton";
 import Notice from "@/components/Notice";
@@ -62,7 +62,7 @@ export default async function ProductDetailPage({ params, searchParams }) {
           <p className="mt-4 text-3xl font-bold text-primary">{formatRupiah(product.price)}</p>
 
           <Link href={`/toko/${product.store_id}`} className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium hover:text-primary">
-            <Store size={16} /> {product.store_name}
+            <LuStore size={16} /> {product.store_name}
           </Link>
 
           <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ink/80">{product.description}</p>
@@ -88,7 +88,7 @@ export default async function ProductDetailPage({ params, searchParams }) {
                   />
                 </div>
                 <SubmitButton pendingText="Menambah..." >
-                  <ShoppingCart size={16} /> {user ? "Tambah ke Keranjang" : "Masuk untuk Membeli"}
+                  <LuShoppingCart size={16} /> {user ? "Tambah ke Keranjang" : "Masuk untuk Membeli"}
                 </SubmitButton>
               </form>
               {user?.role === "buyer" && (
@@ -96,7 +96,7 @@ export default async function ProductDetailPage({ params, searchParams }) {
                   <input type="hidden" name="productId" value={product.id} />
                   <input type="hidden" name="returnTo" value={path} />
                   <button className="btn btn-outline">
-                    <Heart size={16} className={isWished ? "fill-primary" : ""} /> {isWished ? "Di Wishlist" : "Wishlist"}
+                    <LuHeart size={16} className={isWished ? "fill-primary" : ""} /> {isWished ? "Di Wishlist" : "Wishlist"}
                   </button>
                 </form>
               )}

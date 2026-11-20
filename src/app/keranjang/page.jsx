@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { LuTrash2 } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
 import SubmitButton from "@/components/SubmitButton";
 import Notice from "@/components/Notice";
@@ -64,7 +64,7 @@ export default async function CartPage({ searchParams }) {
                           </form>
                           <form action={removeCartItem}>
                             <input type="hidden" name="cartItemId" value={i.id} />
-                            <button className="btn btn-danger btn-sm" aria-label="Hapus"><Trash2 size={14} /></button>
+                            <button className="btn btn-danger btn-sm" aria-label="Hapus"><LuTrash2 size={14} /></button>
                           </form>
                           <span className="ml-auto text-sm font-semibold">{formatRupiah(i.price * i.quantity)}</span>
                         </div>

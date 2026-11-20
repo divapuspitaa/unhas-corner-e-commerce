@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Store } from "lucide-react";
+import { LuStore } from "react-icons/lu";
 import { getStores } from "@/lib/queries";
 
 export const metadata = { title: "Toko Resmi Kampus" };
@@ -21,7 +21,7 @@ export default async function StoresPage() {
               <p className="font-semibold">{s.name}</p>
               <p className="text-sm text-muted">{s.description}</p>
               <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                <Store size={12} /> {s.product_count} produk
+                <LuStore size={12} /> {s.product_count} produk
               </p>
             </div>
           </Link>

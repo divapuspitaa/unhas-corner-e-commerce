@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { LuSearch } from "react-icons/lu";
 import { formatRupiah } from "@/lib/format";
 
 export default function SearchBar() {
@@ -46,7 +46,7 @@ export default function SearchBar() {
   return (
     <div ref={boxRef} className="relative w-full">
       <form onSubmit={onSubmit} className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+        <LuSearch size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
         <input
           value={q}
           onChange={(e) => {
@@ -59,7 +59,7 @@ export default function SearchBar() {
           }}
           onFocus={() => results.length && setOpen(true)}
           placeholder="Cari jas almamater, kalkulator, lanyard..."
-          className="w-full rounded-lg border border-line bg-surface py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:bg-white"
+          className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm outline-none focus:border-primary"
           suppressHydrationWarning
         />
       </form>
