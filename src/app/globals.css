@@ -13,7 +13,7 @@
   --color-primary-soft: #f8e8e8;
   --color-accent: #c5a059;
   --color-accent-soft: #fbf3e0;
-  --color-base: #f9fafb;
+  --color-surface: #f9fafb;
   --color-ink: #1f2937;
   --color-muted: #6b7280;
   --color-line: #e5e7eb;
@@ -31,7 +31,7 @@
 }
 
 body {
-  background: var(--color-base);
+  background: var(--color-surface);
   color: var(--color-ink);
   font-family: var(--font-sans);
 }

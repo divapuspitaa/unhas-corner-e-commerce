@@ -7,7 +7,7 @@ import { submitReview } from "@/actions/orders";
 export default function ReviewForm({ orderId, productId, initialRating = 0, initialComment = "" }) {
   const [rating, setRating] = useState(initialRating);
   return (
-    <form action={submitReview} className="mt-2 space-y-2 rounded-lg bg-base p-3">
+    <form action={submitReview} className="mt-2 space-y-2 rounded-lg bg-surface p-3">
       <input type="hidden" name="orderId" value={orderId} />
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="rating" value={rating} />

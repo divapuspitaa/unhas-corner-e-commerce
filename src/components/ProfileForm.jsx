@@ -11,7 +11,7 @@ export default function ProfileForm({ user }) {
       {state?.ok && <p className="rounded-lg bg-status-success-bg px-3 py-2 text-sm text-status-success-text">{state.ok}</p>}
       <div>
         <label className="label">Email</label>
-        <input value={user.email} disabled className="input bg-base" />
+        <input value={user.email} disabled className="input bg-surface" />
       </div>
       <div>
         <label className="label" htmlFor="name">Nama</label>

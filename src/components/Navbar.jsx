@@ -29,14 +29,15 @@ export default async function Navbar() {
   if (user?.role === "admin") links.push({ href: "/admin/dashboard", label: "Panel Admin" });
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
+    <header className="sticky top-0 z-40 border-b border-line">
+      <div className="absolute inset-0 bg-white/90 backdrop-blur"/>
+      <div className="relative mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
         <Link href="/" className="shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/logo.png" alt="UnhasCorner" className="h-9 w-auto" />
         </Link>
 
-        <div className="hidden flex-1 md:block">
+        <div className="relative px-4 pb-3 md:hidden">
           <SearchBar />
         </div>
 

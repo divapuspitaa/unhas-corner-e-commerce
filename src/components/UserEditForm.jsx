@@ -11,7 +11,7 @@ export default function UserEditForm({ user }) {
       {state?.error && <p className="rounded-lg bg-status-danger-bg px-3 py-2 text-sm text-status-danger-text">{state.error}</p>}
       <div>
         <label className="label">Role</label>
-        <input value={user.role} disabled className="input bg-base capitalize" />
+        <input value={user.role} disabled className="input bg-surface capitalize" />
       </div>
       <div>
         <label className="label" htmlFor="name">Nama</label>

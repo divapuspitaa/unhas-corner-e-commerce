@@ -28,7 +28,7 @@ export default async function SellerOrdersPage({ searchParams }) {
 
       {orders.map((o) => (
         <div key={o.id} className="card overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-base px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface px-4 py-3">
             <div>
               <p className="text-sm font-semibold">{o.order_code}</p>
               <p className="text-xs text-muted">{o.buyer_name} · {formatDate(o.created_at)}</p>

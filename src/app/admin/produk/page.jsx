@@ -28,7 +28,7 @@ export default async function AdminProductsPage({ searchParams }) {
       </form>
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[560px] text-left text-sm">
-          <thead className="border-b border-line bg-base text-xs text-muted">
+          <thead className="border-b border-line bg-surface text-xs text-muted">
             <tr>
               <th className="p-3">Produk</th>
               <th className="p-3">Toko</th>

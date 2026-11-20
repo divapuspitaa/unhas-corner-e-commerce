@@ -59,7 +59,7 @@ export default function SearchBar() {
           }}
           onFocus={() => results.length && setOpen(true)}
           placeholder="Cari jas almamater, kalkulator, lanyard..."
-          className="w-full rounded-lg border border-line bg-base py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:bg-white"
+          className="w-full rounded-lg border border-line bg-surface py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:bg-white"
           suppressHydrationWarning
         />
       </form>
