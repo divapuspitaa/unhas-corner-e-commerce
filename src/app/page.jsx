@@ -22,7 +22,7 @@ export default async function HomePage({ searchParams }) {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-linear-to from-primary-dark via-primary to-primary-hover text-white">
+      <section className="bg-primary bg-linear-to-br from-primary-dark via-primary to-primary-hover text-white">
         <div className="mx-auto max-w-7xl px-4 py-14 md:py-20">
           <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
             Pusat Resmi Perlengkapan Kampus Tamalanrea
