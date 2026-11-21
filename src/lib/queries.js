@@ -3,14 +3,21 @@ import { query } from "@/lib/db";
 const PRODUCT_SELECT = `
   SELECT p.id, p.name, p.description, p.price, p.stock, p.image_url, p.store_id, p.category_id,
          s.name AS store_name, c.name AS category_name,
-         COALESCE(r.avg_rating, 0) AS avg_rating, COALESCE(r.review_count, 0)::int AS review_count
+         COALESCE(r.avg_rating, 0) AS avg_rating, COALESCE(r.review_count, 0)::int AS review_count,
+         COALESCE(sd.sold_count, 0)::int AS sold_count
   FROM products p
   JOIN stores s ON s.id = p.store_id
   LEFT JOIN categories c ON c.id = p.category_id
   LEFT JOIN (
     SELECT product_id, AVG(rating) AS avg_rating, COUNT(*) AS review_count
     FROM reviews GROUP BY product_id
-  ) r ON r.product_id = p.id`;
+  ) r ON r.product_id = p.id
+  LEFT JOIN (
+    SELECT oi.product_id, SUM(oi.quantity) AS sold_count
+    FROM order_items oi JOIN orders o ON o.id = oi.order_id
+    WHERE o.status = 'selesai'
+    GROUP BY oi.product_id
+  ) sd ON sd.product_id = p.id`;
 
 const SORTS = {
   terbaru: "p.id DESC",
@@ -18,6 +25,7 @@ const SORTS = {
   termahal: "p.price DESC, p.id DESC",
   nama: "p.name ASC",
   rating: "avg_rating DESC, review_count DESC",
+  terlaris: "sold_count DESC, p.id DESC"
 };
 
 export const PAGE_SIZE = 12;
@@ -61,6 +69,15 @@ export async function listProducts({ q, category, store, minPrice, maxPrice, sor
 // Rekomendasi acak untuk homepage
 export async function randomProducts(limit = 8) {
   const { rows } = await query(`${PRODUCT_SELECT} WHERE p.stock > 0 ORDER BY RANDOM() LIMIT $1`, [limit]);
+  return rows;
+}
+
+// Produk terlaris untuk homepage
+export async function topProducts(limit = 10) {
+  const { rows } = await query(
+    `${PRODUCT_SELECT} WHERE p.stock > 0 ORDER BY sold_count DESC, p.id DESC LIMIT $1`,
+    [limit]
+  );
   return rows;
 }
 

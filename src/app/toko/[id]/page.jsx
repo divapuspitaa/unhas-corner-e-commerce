@@ -32,7 +32,7 @@ export default async function StoreDetailPage({ params }) {
       {products.length === 0 ? (
         <p className="text-muted">Toko ini belum memiliki produk.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-3 lg:grid-cols-5">
           {products.map((p) => (
             <ProductCard key={p.id} product={p} user={user} wished={wished.has(p.id)} returnTo={`/toko/${storeId}`} />
           ))}

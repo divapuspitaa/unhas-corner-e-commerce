@@ -46,7 +46,6 @@ export default function SearchBar() {
   return (
     <div ref={boxRef} className="relative w-full">
       <form onSubmit={onSubmit} className="relative">
-        <LuSearch size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
         <input
           value={q}
           onChange={(e) => {
@@ -59,9 +58,16 @@ export default function SearchBar() {
           }}
           onFocus={() => results.length && setOpen(true)}
           placeholder="Cari jas almamater, kalkulator, lanyard..."
-          className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm outline-none focus:border-primary"
+          className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-12 text-sm outline-none focus:border-primary"
           suppressHydrationWarning
         />
+        <button
+          type="submit"
+          aria-label="Cari"
+          className="absolute right-1 top-1/2 -translate-y-1/2 rounded-md bg-primary px-3 py-1.5 text-white hover:bg-primary-hover"
+        >
+          <LuSearch size={16} />
+        </button>
       </form>
       {open && results.length > 0 && (
         <ul className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-line bg-white shadow-lg">

@@ -25,6 +25,7 @@ export async function addToCart(formData) {
      DO UPDATE SET quantity = LEAST(cart_items.quantity + $3, $4)`,
     [user.id, productId, quantity, rows[0].stock]
   );
+  if (formData.get("mode") === "buy") redirect("/keranjang");
   redirect(withMsg(returnTo, "ok", "Produk ditambahkan ke keranjang."));
 }
 
