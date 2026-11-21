@@ -26,6 +26,7 @@ export async function addToCart(formData) {
     [user.id, productId, quantity, rows[0].stock]
   );
   if (formData.get("mode") === "buy") redirect("/keranjang");
+    if (formData.get("mode") === "buy") redirect("/keranjang");
   redirect(withMsg(returnTo, "ok", "Produk ditambahkan ke keranjang."));
 }
 

@@ -2,13 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LuHeart } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
-import PurchaseCard from "@/components/PurchaseCard";
 import Notice from "@/components/Notice";
+import SubmitButton from "@/components/SubmitButton";
 import Stars from "@/components/Stars";
 import { Tag } from "@/components/Badge";
 import { getCurrentUser } from "@/lib/auth";
 import { getProduct, getReviews, getWishlistIds } from "@/lib/queries";
 import { formatDate, formatRupiah } from "@/lib/format";
+import { addToCart } from "@/actions/cart";
 import { toggleWishlist } from "@/actions/wishlist";
 
 export const dynamic = "force-dynamic";
@@ -92,7 +93,29 @@ export default async function ProductDetailPage({ params, searchParams }) {
         {/* Kolom 3: kartu pembelian */}
         <aside className="h-fit space-y-3 lg:sticky lg:top-28">
           {canBuy ? (
-            <PurchaseCard productId={product.id} price={product.price} stock={product.stock} path={path} />
+            <form action={addToCart} className="space-y-3 rounded-xl border border-line bg-white p-4">
+              <input type="hidden" name="productId" value={product.id} />
+              <input type="hidden" name="returnTo" value={path} />
+              <p className="text-sm font-semibold">Atur jumlah</p>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  name="quantity"
+                  min="1"
+                  max={Math.max(product.stock, 1)}
+                  defaultValue="1"
+                  className="input w-24"
+                  aria-label="Jumlah"
+                />
+                <span className="text-xs text-muted">{product.stock > 0 ? `Stok: ${product.stock}` : "Stok habis"}</span>
+              </div>
+              <SubmitButton name="mode" value="buy" disabled={product.stock <= 0} className="btn btn-primary w-full" pendingText="Memproses...">
+                Beli Langsung
+              </SubmitButton>
+              <SubmitButton name="mode" value="cart" disabled={product.stock <= 0} className="btn btn-outline w-full" pendingText="Memproses...">
+                + Keranjang
+              </SubmitButton>
+            </form>
           ) : (
             <div className="rounded-xl border border-line bg-white p-4 text-sm text-muted">
               Pembelian hanya tersedia untuk akun Buyer.
