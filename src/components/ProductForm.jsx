@@ -37,15 +37,12 @@ export default function ProductForm({ categories, product }) {
         </div>
       </div>
       <div>
-        <label className="label" htmlFor="image_url">Gambar produk (URL atau path)</label>
-        <input
-          id="image_url"
-          name="image_url"
-          defaultValue={product?.image_url ?? ""}
-          required
-          className="input"
-          placeholder="/images/products/nama-produk.jpg atau https://..."
-        />
+        <label className="label" htmlFor="image">Gambar produk (JPG/PNG/WEBP, maks. 2 MB)</label>
+        <input type="hidden" name="current_image" value={product?.image_url ?? ""} />
+        <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp" className="input" />
+        {product?.image_url && (
+          <p className="mt-1 text-xs text-muted">Gambar saat ini: {product.image_url}. Kosongkan jika tidak ingin mengganti.</p>
+        )}
       </div>
       <SubmitButton>{product ? "Simpan Perubahan" : "Tambah Produk"}</SubmitButton>
     </form>
