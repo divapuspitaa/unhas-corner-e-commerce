@@ -106,6 +106,7 @@ export default async function ProductDetailPage({ params, searchParams }) {
                   defaultValue="1"
                   className="input w-24"
                   aria-label="Jumlah"
+                  suppressHydrationWarning
                 />
                 <span className="text-xs text-muted">{product.stock > 0 ? `Stok: ${product.stock}` : "Stok habis"}</span>
               </div>
