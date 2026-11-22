@@ -50,7 +50,7 @@ export const getCurrentUser = cache(async () => {
 export async function requireUser(role) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (role && user.role !== role) redirect("/");
+  if (role && user.role !== role) redirect("/forbidden");
   return user;
 }
 

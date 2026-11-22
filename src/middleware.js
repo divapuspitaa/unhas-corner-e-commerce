@@ -4,7 +4,6 @@ import { COOKIE_NAME, secretKey } from "@/lib/jwt";
 
 // Middleware berjalan di server SEBELUM halaman dimuat.
 // Hanya membaca cookie JWT (bukan localStorage) dan TIDAK memanggil PostgreSQL.
-// Pengecekan detail (mis. seller sudah approved) tetap dilakukan di layout masing-masing.
 export async function middleware(request) {
   const { pathname, search } = request.nextUrl;
 
@@ -15,11 +14,11 @@ export async function middleware(request) {
       const { payload } = await jwtVerify(token, secretKey());
       role = payload.role ?? null;
     } catch {
-      role = null; // token rusak / kedaluwarsa
+      role = null;
     }
   }
 
-  // Belum login -> ke halaman login
+  // Belum login -> arahkan ke halaman login
   if (!role) {
     const url = new URL("/login", request.url);
     url.searchParams.set("next", pathname + search);
@@ -32,9 +31,9 @@ export async function middleware(request) {
   else if (pathname.startsWith("/seller")) needed = "seller";
   else if (pathname.startsWith("/buyer") || pathname === "/keranjang") needed = "buyer";
 
-  // Salah role -> kembali ke /dashboard (pengarah sesuai role)
+  // Sudah login tetapi salah role -> tampilkan halaman 403 Forbidden
   if (needed && role !== needed) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/forbidden", request.url));
   }
 
   return NextResponse.next();
