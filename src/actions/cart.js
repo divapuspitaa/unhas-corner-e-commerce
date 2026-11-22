@@ -6,9 +6,13 @@ import { getCurrentUser, requireUser, safePath } from "@/lib/auth";
 import { makeOrderCode } from "@/lib/format";
 import { withMsg } from "@/lib/flash";
 
+const isPosInt = (n) => Number.isInteger(n) && n > 0;
+
 export async function addToCart(formData) {
   const productId = Number(formData.get("productId"));
-  const quantity = Math.max(1, Number(formData.get("quantity")) || 1);
+  if (!isPosInt(productId)) redirect("/produk");
+
+  const quantity = Math.max(1, Math.floor(Number(formData.get("quantity")) || 1));
   const returnTo = safePath(String(formData.get("returnTo") ?? ""), `/produk/${productId}`);
 
   const user = await getCurrentUser();
@@ -25,8 +29,8 @@ export async function addToCart(formData) {
      DO UPDATE SET quantity = LEAST(cart_items.quantity + $3, $4)`,
     [user.id, productId, quantity, rows[0].stock]
   );
+
   if (formData.get("mode") === "buy") redirect("/keranjang");
-    if (formData.get("mode") === "buy") redirect("/keranjang");
   redirect(withMsg(returnTo, "ok", "Produk ditambahkan ke keranjang."));
 }
 
@@ -34,14 +38,15 @@ export async function updateCartQty(formData) {
   const user = await requireUser("buyer");
   const id = Number(formData.get("cartItemId"));
   const qty = Number(formData.get("quantity"));
+  if (!isPosInt(id)) redirect("/keranjang");
 
   if (!Number.isFinite(qty) || qty < 1) {
     await query("DELETE FROM cart_items WHERE id = $1 AND user_id = $2", [id, user.id]);
   } else {
     await query(
       `UPDATE cart_items c SET quantity = LEAST($1, p.stock)
-       FROM products p WHERE c.id = $2 AND c.user_id = $3 AND p.id = c.product_id`,
-      [qty, id, user.id]
+       FROM products p WHERE c.id = $2 AND c.user_id = $3 AND p.id = c.product_id AND p.stock > 0`,
+      [Math.floor(qty), id, user.id]
     );
   }
   redirect("/keranjang");
@@ -49,7 +54,10 @@ export async function updateCartQty(formData) {
 
 export async function removeCartItem(formData) {
   const user = await requireUser("buyer");
-  await query("DELETE FROM cart_items WHERE id = $1 AND user_id = $2", [Number(formData.get("cartItemId")), user.id]);
+  const id = Number(formData.get("cartItemId"));
+  if (isPosInt(id)) {
+    await query("DELETE FROM cart_items WHERE id = $1 AND user_id = $2", [id, user.id]);
+  }
   redirect("/keranjang");
 }
 
@@ -59,7 +67,9 @@ export async function checkout(formData) {
   const addressId = Number(formData.get("addressId"));
   const note = String(formData.get("note") ?? "").trim() || null;
 
-  if (!addressId) redirect(withMsg("/keranjang", "err", "Pilih alamat pengiriman terlebih dahulu."));
+  if (!isPosInt(addressId)) {
+    redirect(withMsg("/keranjang", "err", "Pilih alamat pengiriman terlebih dahulu."));
+  }
 
   let failure = null;
   try {
@@ -90,7 +100,7 @@ export async function checkout(formData) {
       const shippingAddress = `${addr.full_address}, ${addr.city}${addr.postal_code ? " " + addr.postal_code : ""}`;
 
       for (const [storeId, list] of byStore) {
-        const total = list.reduce((s, it) => s + it.price * it.quantity, 0);
+        const total = list.reduce((s, it) => s + Number(it.price) * it.quantity, 0);
         let code = makeOrderCode();
         for (let i = 0; i < 5; i++) {
           const dup = await client.query("SELECT 1 FROM orders WHERE order_code = $1", [code]);
@@ -110,7 +120,7 @@ export async function checkout(formData) {
           await client.query(
             `INSERT INTO order_items (order_id, product_id, product_name, product_image, price, quantity, subtotal)
              VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-            [order.id, it.product_id, it.name, it.image_url, it.price, it.quantity, it.price * it.quantity]
+            [order.id, it.product_id, it.name, it.image_url, it.price, it.quantity, Number(it.price) * it.quantity]
           );
           await client.query("UPDATE products SET stock = stock - $1 WHERE id = $2", [it.quantity, it.product_id]);
         }

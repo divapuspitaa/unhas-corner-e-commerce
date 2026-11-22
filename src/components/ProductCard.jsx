@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { LuStore, LuHeart, LuStar } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
+import SubmitButton from "@/components/SubmitButton";
+import { addToCart } from "@/actions/cart";
 import { toggleWishlist } from "@/actions/wishlist";
 import { formatRupiah } from "@/lib/format";
 
 export default function ProductCard({ product, user, wished = false, returnTo = "/" }) {
   const p = product;
   const outOfStock = p.stock <= 0;
+  const canBuy = !user || user.role === "buyer";
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-lg border border-line bg-white transition hover:shadow-md">
@@ -29,7 +32,7 @@ export default function ProductCard({ product, user, wished = false, returnTo = 
         </form>
       )}
 
-      <div className="space-y-1 p-2.5">
+      <div className="flex flex-1 flex-col space-y-1 p-2.5">
         <Link href={`/produk/${p.id}`} className="line-clamp-2 min-h-10 text-sm hover:text-primary">
           {p.name}
         </Link>
@@ -42,6 +45,22 @@ export default function ProductCard({ product, user, wished = false, returnTo = 
           {p.review_count > 0 ? Number(p.avg_rating).toFixed(1) : "-"}
           {p.sold_count > 0 && <span>· {p.sold_count} terjual</span>}
         </p>
+
+      {canBuy && (
+          <form action={addToCart} className="mt-auto pt-2">
+            <input type="hidden" name="productId" value={p.id} />
+            <input type="hidden" name="quantity" value="1" />
+            <input type="hidden" name="mode" value="cart" />
+            <input type="hidden" name="returnTo" value={returnTo} />
+            <SubmitButton
+              disabled={outOfStock}
+              className="btn btn-outline btn-sm w-full"
+              pendingText="Menambah..."
+            >
+              {outOfStock ? "Stok Habis" : "+ Keranjang"}
+            </SubmitButton>
+          </form>
+        )}
       </div>
     </div>
   );

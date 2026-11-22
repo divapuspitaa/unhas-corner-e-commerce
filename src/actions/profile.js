@@ -6,6 +6,8 @@ import { query, withTransaction } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { withMsg } from "@/lib/flash";
 
+const isPosInt = (n) => Number.isInteger(n) && n > 0;
+
 export async function updateProfile(prevState, formData) {
   const user = await requireUser();
   const name = String(formData.get("name") ?? "").trim();
@@ -54,13 +56,18 @@ export async function addAddress(prevState, formData) {
 
 export async function deleteAddress(formData) {
   const user = await requireUser("buyer");
-  await query("DELETE FROM addresses WHERE id = $1 AND user_id = $2", [Number(formData.get("id")), user.id]);
+  const id = Number(formData.get("id"));
+  if (!isPosInt(id)) redirect(withMsg("/buyer/alamat", "err", "ID alamat tidak valid."));
+
+  await query("DELETE FROM addresses WHERE id = $1 AND user_id = $2", [id, user.id]);
   redirect(withMsg("/buyer/alamat", "ok", "Alamat dihapus."));
 }
 
 export async function setDefaultAddress(formData) {
   const user = await requireUser("buyer");
   const id = Number(formData.get("id"));
+  if (!isPosInt(id)) redirect(withMsg("/buyer/alamat", "err", "ID alamat tidak valid."));
+
   await withTransaction(async (client) => {
     await client.query("UPDATE addresses SET is_default = FALSE WHERE user_id = $1", [user.id]);
     await client.query("UPDATE addresses SET is_default = TRUE WHERE id = $1 AND user_id = $2", [id, user.id]);

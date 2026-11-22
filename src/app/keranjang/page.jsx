@@ -28,9 +28,10 @@ export default async function CartPage({ searchParams }) {
     query("SELECT * FROM addresses WHERE user_id = $1 ORDER BY is_default DESC, id", [user.id]),
   ]);
 
-  const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const total = items.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
   const storeNames = [...new Set(items.map((i) => i.store_name))];
+  const hasStockIssue = items.some((i) => i.stock <= 0 || i.quantity > i.stock);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-5">
@@ -59,11 +60,22 @@ export default async function CartPage({ searchParams }) {
                         <Link href={`/produk/${i.product_id}`} className="line-clamp-2 text-sm hover:text-primary">{i.name}</Link>
                         <p className="text-sm font-bold">{formatRupiah(i.price)}</p>
                         <div className="mt-auto flex flex-wrap items-center gap-2">
-                          <form action={updateCartQty} className="flex items-center gap-2">
-                            <input type="hidden" name="cartItemId" value={i.id} />
-                            <input type="number" name="quantity" min="1" max={i.stock} defaultValue={i.quantity} className="input w-20! py-1!" />
-                            <SubmitButton className="btn btn-outline btn-sm" pendingText="...">Ubah</SubmitButton>
-                          </form>
+                          {i.stock > 0 ? (
+                            <form action={updateCartQty} className="flex items-center gap-2">
+                              <input type="hidden" name="cartItemId" value={i.id} />
+                              <input
+                                type="number"
+                                name="quantity"
+                                min="1"
+                                max={i.stock}
+                                defaultValue={Math.min(i.quantity, i.stock)}
+                                className="input w-20! py-1!"
+                              />
+                              <SubmitButton className="btn btn-outline btn-sm" pendingText="...">Ubah</SubmitButton>
+                            </form>
+                          ) : (
+                            <span className="text-xs font-semibold text-status-danger-text">Stok habis, hapus item ini</span>
+                          )}
                           <form action={removeCartItem}>
                             <input type="hidden" name="cartItemId" value={i.id} />
                             <button className="btn btn-danger btn-sm" aria-label="Hapus"><LuTrash2 size={14} /></button>
@@ -106,7 +118,13 @@ export default async function CartPage({ searchParams }) {
               <label className="label" htmlFor="note">Catatan (opsional)</label>
               <textarea id="note" name="note" rows={2} className="input" />
             </div>
-            <SubmitButton className="btn btn-primary w-full" pendingText="Memproses...">Beli ({totalQty})</SubmitButton>
+            <SubmitButton
+              disabled={addresses.length === 0 || hasStockIssue}
+              className="btn btn-primary w-full"
+              pendingText="Memproses..."
+            >
+              Beli ({totalQty})
+            </SubmitButton>
           </form>
         </div>
       )}

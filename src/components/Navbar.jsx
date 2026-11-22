@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCartCount, getCategories } from "@/lib/queries";
 import { logout } from "@/actions/auth";
 
-const KEYWORDS = ["Jas Almamater", "Kalkulator", "Lanyard", "Toga", "Jas Lab"];
+const KEYWORDS = ["Jas Almamater", "Toga", "Jaket KKN", "Drawing Pen", "Handscoon"];
 
 export default async function Navbar() {
   const [user, categories] = await Promise.all([getCurrentUser(), getCategories()]);
@@ -27,11 +27,20 @@ export default async function Navbar() {
       { href: "/buyer/profil", label: "Profil" }
     );
   }
-  if (user?.role === "seller") links.push({ href: user.seller_status === "approved" ? "/seller/dashboard" : "/seller/pending", label: "Dashboard Toko" });
+  if (user?.role === "seller") {
+    links.push({
+      href: user.seller_status === "approved" ? "/seller/dashboard" : "/seller/pending",
+      label: "Dashboard Toko",
+    });
+  }
   if (user?.role === "admin") links.push({ href: "/admin/dashboard", label: "Panel Admin" });
 
   const dashboardHref =
-    user?.role === "admin" ? "/admin/dashboard" : user?.seller_status === "approved" ? "/seller/dashboard" : "/seller/pending";
+    user?.role === "admin"
+      ? "/admin/dashboard"
+      : user?.seller_status === "approved"
+        ? "/seller/dashboard"
+        : "/seller/pending";
 
   const CartBadge = cartCount > 0 && (
     <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] font-bold text-white">

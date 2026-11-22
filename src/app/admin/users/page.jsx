@@ -2,6 +2,7 @@ import Link from "next/link";
 import ConfirmButton from "@/components/ConfirmButton";
 import Notice from "@/components/Notice";
 import { SellerBadge } from "@/components/Badge";
+import { getCurrentUser } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { formatDate } from "@/lib/format";
 import { deleteUser } from "@/actions/admin";
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminUsersPage({ searchParams }) {
   const sp = await searchParams;
   const q = (sp?.q ?? "").trim();
+  const currentAdmin = await getCurrentUser();
 
   const { rows } = await query(
     `SELECT u.id, u.name, u.email, u.phone, u.role, u.seller_status, u.created_at, s.name AS store_name
@@ -84,12 +86,14 @@ export default async function AdminUsersPage({ searchParams }) {
                       >
                         Edit
                       </Link>
-                      <form action={deleteUser}>
-                        <input type="hidden" name="userId" value={u.id} />
-                        <ConfirmButton message={`Hapus akun "${u.name}"?`}>
-                          Hapus
-                        </ConfirmButton>
-                      </form>
+                      {u.id !== currentAdmin?.id && (
+                        <form action={deleteUser}>
+                          <input type="hidden" name="userId" value={u.id} />
+                          <ConfirmButton message={`Hapus akun "${u.name}"?`}>
+                            Hapus
+                          </ConfirmButton>
+                        </form>
+                      )}
                     </div>
                   </td>
                 </tr>

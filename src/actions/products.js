@@ -8,6 +8,8 @@ import { requireApprovedSeller } from "@/lib/auth";
 import { getStoreByUser } from "@/lib/queries";
 import { withMsg } from "@/lib/flash";
 
+const isPosInt = (n) => Number.isInteger(n) && n > 0;
+
 // Ubah "Ganci Unhas!" menjadi "ganci-unhas"
 function slugify(text) {
   return (
@@ -48,7 +50,7 @@ async function parseProduct(formData) {
   if (!description) return { error: "Deskripsi wajib diisi." };
   if (!Number.isFinite(price) || price < 0 || formData.get("price") === "") return { error: "Harga harus angka dan tidak negatif." };
   if (!Number.isInteger(stock) || stock < 0 || formData.get("stock") === "") return { error: "Stok harus bilangan bulat tidak negatif." };
-  if (!categoryId) return { error: "Kategori wajib dipilih." };
+  if (!isPosInt(categoryId)) return { error: "Kategori wajib dipilih." };
 
   const cat = await query("SELECT 1 FROM categories WHERE id = $1", [categoryId]);
   if (cat.rowCount === 0) return { error: "Kategori tidak valid." };
@@ -85,6 +87,8 @@ export async function createProduct(prevState, formData) {
 export async function updateProduct(prevState, formData) {
   const user = await requireApprovedSeller();
   const id = Number(formData.get("id"));
+  if (!isPosInt(id)) return { error: "ID produk tidak valid." };
+
   const { error, data } = await parseProduct(formData);
   if (error) return { error };
 
@@ -100,6 +104,8 @@ export async function updateProduct(prevState, formData) {
 export async function deleteProduct(formData) {
   const user = await requireApprovedSeller();
   const id = Number(formData.get("id"));
+  if (!isPosInt(id)) redirect(withMsg("/seller/produk", "err", "ID produk tidak valid."));
+
   await query(
     "DELETE FROM products p USING stores s WHERE p.id = $1 AND p.store_id = s.id AND s.user_id = $2",
     [id, user.id]

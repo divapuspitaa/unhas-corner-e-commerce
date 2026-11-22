@@ -7,10 +7,13 @@ import { NEXT_STATUS } from "@/lib/format";
 import { changeOrderStatus } from "@/lib/orders";
 import { withMsg } from "@/lib/flash";
 
+const isPosInt = (n) => Number.isInteger(n) && n > 0;
+
 // ---------- Buyer ----------
 export async function cancelOrder(formData) {
   const user = await requireUser("buyer");
   const orderId = Number(formData.get("orderId"));
+  if (!isPosInt(orderId)) redirect(withMsg("/buyer/pesanan", "err", "ID pesanan tidak valid."));
 
   let msg = null;
   await withTransaction(async (client) => {
@@ -27,6 +30,7 @@ export async function cancelOrder(formData) {
 export async function confirmReceived(formData) {
   const user = await requireUser("buyer");
   const orderId = Number(formData.get("orderId"));
+  if (!isPosInt(orderId)) redirect(withMsg("/buyer/pesanan", "err", "ID pesanan tidak valid."));
 
   let msg = null;
   await withTransaction(async (client) => {
@@ -47,6 +51,9 @@ export async function submitReview(formData) {
   const rating = Number(formData.get("rating"));
   const comment = String(formData.get("comment") ?? "").trim();
 
+  if (!isPosInt(orderId) || !isPosInt(productId)) {
+    redirect(withMsg("/buyer/pesanan", "err", "Data ulasan tidak valid."));
+  }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     redirect(withMsg("/buyer/pesanan", "err", "Rating harus 1 sampai 5."));
   }
@@ -71,6 +78,7 @@ export async function updateOrderStatus(formData) {
   const user = await requireApprovedSeller();
   const orderId = Number(formData.get("orderId"));
   const status = String(formData.get("status") ?? "");
+  if (!isPosInt(orderId)) redirect(withMsg("/seller/pesanan", "err", "ID pesanan tidak valid."));
 
   let msg = null;
   await withTransaction(async (client) => {
