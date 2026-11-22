@@ -67,7 +67,7 @@ export default function HeroBanner() {
                   />
                   <Link
                     href={banner.href}
-                    className="absolute bottom-[14%] left-[5.2%] z-10 inline-flex items-center justify-center rounded-lg bg-[#C59E56] px-3 py-1.5 text-xs font-bold text-[#6E0D0D] shadow-md transition duration-200 hover:-translate-y-0.5 hover:bg-[#d2ac64] hover:shadow-lg active:translate-y-0 sm:bottom-[11%] sm:rounded-xl sm:px-5 sm:py-2.5 sm:text-sm md:px-7 md:py-3 md:text-base"
+                    className="absolute top-[74%] left-[5.2%] z-10 inline-flex items-center justify-center rounded-md bg-[#C59E56] px-2.5 py-0.5 text-[10px] font-bold text-[#6E0D0D] shadow-md transition duration-200 hover:-translate-y-0.5 hover:bg-[#d2ac64] hover:shadow-lg active:translate-y-0 sm:top-[75%] sm:rounded-lg sm:px-4 sm:py-1.5 sm:text-xs md:px-6 md:py-2 md:text-sm"
                   >
                     {banner.ctaText}
                   </Link>
