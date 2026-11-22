@@ -19,6 +19,7 @@ const BANNERS = [
     src: "/images/banners/banner-3-logo-unhas.png",
     alt: "Bangga jadi bagian dari Universitas Hasanuddin",
     href: "/produk",
+    ctaText: "Belanja Sekarang",
   },
 ];
 
@@ -49,31 +50,48 @@ export default function HeroBanner() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Frame utama banner */}
-      <div className="overflow-hidden rounded-2xl border border-line bg-primary shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-line bg-primary shadow-sm">
         <div
           className="flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {BANNERS.map((banner, index) => (
-            <Link
-              key={banner.src}
-              href={banner.href}
-              className="block w-full shrink-0"
-              aria-label={banner.alt}
-            >
-              <img
-                src={banner.src}
-                alt={banner.alt}
-                loading={index === 0 ? "eager" : "lazy"}
-                className="block h-auto w-full object-cover"
-              />
-            </Link>
+            <div key={banner.src} className="relative w-full shrink-0">
+              {banner.ctaText ? (
+                <>
+                  <img
+                    src={banner.src}
+                    alt={banner.alt}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    className="block h-auto w-full object-cover"
+                  />
+                  <Link
+                    href={banner.href}
+                    className="absolute bottom-[14%] left-[5.2%] z-10 inline-flex items-center justify-center rounded-lg bg-[#C59E56] px-3 py-1.5 text-xs font-bold text-[#6E0D0D] shadow-md transition duration-200 hover:-translate-y-0.5 hover:bg-[#d2ac64] hover:shadow-lg active:translate-y-0 sm:bottom-[11%] sm:rounded-xl sm:px-5 sm:py-2.5 sm:text-sm md:px-7 md:py-3 md:text-base"
+                  >
+                    {banner.ctaText}
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  href={banner.href}
+                  className="block w-full"
+                  aria-label={banner.alt}
+                >
+                  <img
+                    src={banner.src}
+                    alt={banner.alt}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    className="block h-auto w-full object-cover"
+                  />
+                </Link>
+              )}
+            </div>
           ))}
         </div>
 
         {/* Indikator titik di pojok kiri bawah */}
-        <div className="absolute bottom-3 left-4 flex items-center gap-1.5">
+        <div className="absolute bottom-2 left-4 z-10 flex items-center gap-1.5 sm:bottom-3">
           {BANNERS.map((banner, index) => (
             <button
               key={banner.src}
@@ -95,7 +113,7 @@ export default function HeroBanner() {
         type="button"
         onClick={prevSlide}
         aria-label="Banner sebelumnya"
-        className="absolute top-1/2 left-2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-white/95 text-ink shadow-md transition hover:bg-white md:-left-4 md:h-10 md:w-10"
+        className="absolute top-1/2 left-2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-white/95 text-ink shadow-md transition hover:bg-white md:-left-4 md:h-10 md:w-10"
       >
         <LuChevronLeft size={20} />
       </button>
@@ -105,7 +123,7 @@ export default function HeroBanner() {
         type="button"
         onClick={nextSlide}
         aria-label="Banner berikutnya"
-        className="absolute top-1/2 right-2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-white/95 text-ink shadow-md transition hover:bg-white md:-right-4 md:h-10 md:w-10"
+        className="absolute top-1/2 right-2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-white/95 text-ink shadow-md transition hover:bg-white md:-right-4 md:h-10 md:w-10"
       >
         <LuChevronRight size={20} />
       </button>
