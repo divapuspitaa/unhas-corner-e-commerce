@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { LuArrowRight, LuShirt, LuFlaskConical, LuGraduationCap, LuGift, LuStore } from "react-icons/lu";
+import { LuShirt, LuFlaskConical, LuGraduationCap, LuGift, LuStore } from "react-icons/lu";
+import HeroBanner from "@/components/HeroBanner";
 import ProductCard from "@/components/ProductCard";
 import Notice from "@/components/Notice";
-import { getCurrentUser, homePathFor } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { getCategories, getStores, getWishlistIds, randomProducts, topProducts } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
@@ -25,52 +26,8 @@ export default async function HomePage({ searchParams }) {
     <div className="mx-auto max-w-7xl space-y-5 px-4 py-4">
       <Notice ok={sp.ok} err={sp.err} />
 
-      {/* Banner + kartu sapaan */}
-      <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
-        <section className="rounded-xl bg-primary bg-linear-to-br from-primary-dark via-primary to-primary-hover p-6 text-white md:p-10">
-          <span className="inline-block rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-            Pusat Resmi Perlengkapan Kampus Tamalanrea
-          </span>
-          <h1 className="mt-4 max-w-xl text-2xl font-bold leading-tight md:text-4xl">
-            Satu Pintu Kebutuhan Akademik &amp; Atribut Mahasiswa Unhas
-          </h1>
-          <p className="mt-3 max-w-lg text-sm text-white/85 md:text-base">
-            Jas almamater, alat praktikum, alat tulis, toga wisuda, hingga merchandise resmi dari toko-toko kampus terverifikasi.
-          </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/produk" className="btn bg-white text-primary hover:bg-primary-soft">
-              Jelajahi Katalog <LuArrowRight size={16} />
-            </Link>
-            <Link href="/toko" className="btn border border-white/40 text-white hover:bg-white/10">
-              Lihat Toko Mitra
-            </Link>
-          </div>
-        </section>
-
-        <aside className="hidden rounded-xl border border-line bg-white p-5 lg:block">
-          {user ? (
-            <>
-              <p className="text-xs text-muted">Selamat datang kembali</p>
-              <p className="mt-1 text-lg font-semibold">{user.name}</p>
-              <p className="text-xs capitalize text-muted">{user.role}</p>
-              <Link href={homePathFor(user)} className="btn btn-primary mt-4 w-full">Buka Dashboard</Link>
-              {user.role === "buyer" && (
-                <div className="mt-3 grid grid-cols-2 gap-2 text-center text-sm">
-                  <Link href="/buyer/pesanan" className="rounded-lg border border-line py-2 hover:border-primary hover:text-primary">Pesanan</Link>
-                  <Link href="/keranjang" className="rounded-lg border border-line py-2 hover:border-primary hover:text-primary">Keranjang</Link>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              <p className="text-lg font-semibold">Gabung UnhasCorner</p>
-              <p className="mt-1 text-sm text-muted">Masuk untuk belanja perlengkapan kampus dan melacak pesananmu.</p>
-              <Link href="/login" className="btn btn-primary mt-4 w-full">Masuk</Link>
-              <Link href="/register" className="btn btn-outline mt-2 w-full">Daftar</Link>
-            </>
-          )}
-        </aside>
-      </div>
+      {/* Hero Banner Carousel ala Tokopedia */}
+      <HeroBanner />
 
       {/* Ikon kategori */}
       <section className="rounded-xl border border-line bg-white p-4 md:p-5">
