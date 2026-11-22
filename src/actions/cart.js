@@ -24,9 +24,9 @@ export async function addToCart(formData) {
   if (rows[0].stock <= 0) redirect(withMsg(returnTo, "err", "Stok produk habis."));
 
   await query(
-    `INSERT INTO cart_items (user_id, product_id, quantity) VALUES ($1, $2, LEAST($3, $4))
+    `INSERT INTO cart_items (user_id, product_id, quantity) VALUES ($1, $2, LEAST($3::int, $4::int))
      ON CONFLICT (user_id, product_id)
-     DO UPDATE SET quantity = LEAST(cart_items.quantity + $3, $4)`,
+     DO UPDATE SET quantity = LEAST(cart_items.quantity + $3::int, $4::int)`,
     [user.id, productId, quantity, rows[0].stock]
   );
 
@@ -44,7 +44,7 @@ export async function updateCartQty(formData) {
     await query("DELETE FROM cart_items WHERE id = $1 AND user_id = $2", [id, user.id]);
   } else {
     await query(
-      `UPDATE cart_items c SET quantity = LEAST($1, p.stock)
+      `UPDATE cart_items c SET quantity = LEAST($1::int, p.stock)
        FROM products p WHERE c.id = $2 AND c.user_id = $3 AND p.id = c.product_id AND p.stock > 0`,
       [Math.floor(qty), id, user.id]
     );
