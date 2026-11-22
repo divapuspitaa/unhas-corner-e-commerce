@@ -40,7 +40,7 @@ export default async function AdminUsersPage({ searchParams }) {
       </form>
 
       <div className="card overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left text-sm">
+        <table className="w-full min-w-160 text-left text-sm">
           <thead className="border-b border-line bg-surface text-xs text-muted">
             <tr>
               <th className="p-3">Pengguna</th>
