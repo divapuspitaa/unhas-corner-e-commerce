@@ -18,8 +18,12 @@ export default function StoreForm({ store }) {
         <textarea id="description" name="description" defaultValue={store?.description ?? ""} required rows={3} className="input" />
       </div>
       <div>
-        <label className="label" htmlFor="image_url">Gambar toko (URL / path, opsional)</label>
-        <input id="image_url" name="image_url" defaultValue={store?.image_url ?? ""} className="input" placeholder="/images/stores/hadin.jpg" />
+        <label className="label" htmlFor="image">Gambar toko (JPG/PNG/WEBP, maks. 2 MB, opsional)</label>
+        <input type="hidden" name="current_image" value={store?.image_url ?? ""} />
+        <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/webp" className="input" />
+        {store?.image_url && (
+          <p className="mt-1 text-xs text-muted">Gambar saat ini: {store.image_url}. Kosongkan jika tidak ingin mengganti.</p>
+        )}
       </div>
       <SubmitButton>Simpan Toko</SubmitButton>
     </form>
