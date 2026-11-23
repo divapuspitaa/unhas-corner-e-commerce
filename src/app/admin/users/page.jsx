@@ -16,7 +16,7 @@ export default async function AdminUsersPage({ searchParams }) {
   const currentAdmin = await getCurrentUser();
 
   const { rows } = await query(
-    `SELECT u.id, u.name, u.email, u.phone, u.role, u.seller_status, u.created_at, s.name AS store_name
+    `SELECT u.id, u.name, u.email, u.phone, u.role, u.seller_status, u.is_active, u.created_at, s.name AS store_name
      FROM users u
      LEFT JOIN stores s ON s.user_id = u.id
      WHERE u.name ILIKE $1 OR u.email ILIKE $1
@@ -75,6 +75,11 @@ export default async function AdminUsersPage({ searchParams }) {
                         <SellerBadge status={u.seller_status} />
                       </span>
                     )}
+                    {u.is_active === false && (
+                      <span className="ml-1.5 inline-block rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                        Nonaktif
+                      </span>
+                    )}
                   </td>
                   <td className="p-3 text-muted">{u.store_name ?? "-"}</td>
                   <td className="p-3 text-xs text-muted">{formatDate(u.created_at)}</td>
@@ -86,11 +91,11 @@ export default async function AdminUsersPage({ searchParams }) {
                       >
                         Edit
                       </Link>
-                      {u.id !== currentAdmin?.id && (
+                      {u.id !== currentAdmin?.id && u.is_active !== false && (
                         <form action={deleteUser}>
                           <input type="hidden" name="userId" value={u.id} />
-                          <ConfirmButton message={`Hapus akun "${u.name}"?`}>
-                            Hapus
+                          <ConfirmButton message={`Nonaktifkan akun "${u.name}"?`}>
+                            Nonaktifkan
                           </ConfirmButton>
                         </form>
                       )}

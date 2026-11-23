@@ -19,10 +19,16 @@ export async function POST(request) {
   if (!EMAIL_RE.test(email)) return NextResponse.json({ error: "Format email tidak valid." }, { status: 400 });
   if (!password) return NextResponse.json({ error: "Password wajib diisi." }, { status: 400 });
 
-  const { rows } = await query("SELECT id, password_hash, role, seller_status FROM users WHERE email = $1", [email]);
+  const { rows } = await query(
+    "SELECT id, password_hash, role, seller_status, is_active FROM users WHERE email = $1",
+    [email]
+  );
   const user = rows[0];
   if (!user || !(await bcrypt.compare(password, user.password_hash))) {
     return NextResponse.json({ error: "Email atau password salah." }, { status: 401 });
+  }
+  if (user.is_active === false) {
+    return NextResponse.json({ error: "Akun Anda telah dinonaktifkan oleh Admin." }, { status: 403 });
   }
 
   await createSession(user);

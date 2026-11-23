@@ -7,6 +7,7 @@ const PRODUCT_SELECT = `
          COALESCE(sd.sold_count, 0)::int AS sold_count
   FROM products p
   JOIN stores s ON s.id = p.store_id
+  JOIN users u ON u.id = s.user_id
   LEFT JOIN categories c ON c.id = p.category_id
   LEFT JOIN (
     SELECT product_id, AVG(rating) AS avg_rating, COUNT(*) AS review_count
@@ -32,7 +33,7 @@ export const PAGE_SIZE = 12;
 
 // Daftar produk dengan pencarian, filter kategori/toko/harga, sorting, dan pagination
 export async function listProducts({ q, category, store, minPrice, maxPrice, sort = "terbaru", page = 1 } = {}) {
-  const where = [];
+  const where = ["u.is_active = true"];
   const params = [];
   if (q) {
     params.push(`%${q}%`);
@@ -54,11 +55,18 @@ export async function listProducts({ q, category, store, minPrice, maxPrice, sor
     params.push(Number(maxPrice));
     where.push(`p.price <= $${params.length}`);
   }
-  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const whereSql = `WHERE ${where.join(" AND ")}`;
   const orderSql = SORTS[sort] ?? SORTS.terbaru;
   const offset = (Math.max(1, Number(page) || 1) - 1) * PAGE_SIZE;
 
-  const countRes = await query(`SELECT COUNT(*)::int AS total FROM products p ${whereSql}`, params);
+  const countRes = await query(
+    `SELECT COUNT(*)::int AS total
+     FROM products p
+     JOIN stores s ON s.id = p.store_id
+     JOIN users u ON u.id = s.user_id
+     ${whereSql}`,
+    params
+  );
   const { rows } = await query(
     `${PRODUCT_SELECT} ${whereSql} ORDER BY ${orderSql} LIMIT ${PAGE_SIZE} OFFSET ${offset}`,
     params
@@ -66,23 +74,26 @@ export async function listProducts({ q, category, store, minPrice, maxPrice, sor
   return { products: rows, total: countRes.rows[0].total };
 }
 
-// Rekomendasi acak untuk homepage
+// Rekomendasi untuk homepage (urutan tetap agar tidak bergeser saat klik wishlist)
 export async function randomProducts(limit = 8) {
-  const { rows } = await query(`${PRODUCT_SELECT} WHERE p.stock > 0 ORDER BY RANDOM() LIMIT $1`, [limit]);
+  const { rows } = await query(
+    `${PRODUCT_SELECT} WHERE u.is_active = true AND p.stock > 0 ORDER BY hashtext(p.id::text) LIMIT $1`,
+    [limit]
+  );
   return rows;
 }
 
 // Produk terlaris untuk homepage
 export async function topProducts(limit = 10) {
   const { rows } = await query(
-    `${PRODUCT_SELECT} WHERE p.stock > 0 ORDER BY sold_count DESC, p.id DESC LIMIT $1`,
+    `${PRODUCT_SELECT} WHERE u.is_active = true AND p.stock > 0 ORDER BY sold_count DESC, p.id DESC LIMIT $1`,
     [limit]
   );
   return rows;
 }
 
 export async function getProduct(id) {
-  const { rows } = await query(`${PRODUCT_SELECT} WHERE p.id = $1`, [id]);
+  const { rows } = await query(`${PRODUCT_SELECT} WHERE p.id = $1 AND u.is_active = true`, [id]);
   return rows[0] ?? null;
 }
 
@@ -98,8 +109,11 @@ export async function getReviews(productId) {
 
 export async function getCategories() {
   const { rows } = await query(
-    `SELECT c.id, c.name, c.description, COUNT(p.id)::int AS product_count
-     FROM categories c LEFT JOIN products p ON p.category_id = c.id
+    `SELECT c.id, c.name, c.description, COUNT(u.id)::int AS product_count
+     FROM categories c
+     LEFT JOIN products p ON p.category_id = c.id
+     LEFT JOIN stores s ON s.id = p.store_id
+     LEFT JOIN users u ON u.id = s.user_id AND u.is_active = true
      GROUP BY c.id ORDER BY c.id`
   );
   return rows;
@@ -109,14 +123,20 @@ export async function getStores() {
   const { rows } = await query(
     `SELECT s.id, s.name, s.description, s.image_url, COUNT(p.id)::int AS product_count
      FROM stores s LEFT JOIN products p ON p.store_id = s.id
-     JOIN users u ON u.id = s.user_id AND u.seller_status = 'approved'
+     JOIN users u ON u.id = s.user_id AND u.seller_status = 'approved' AND u.is_active = true
      GROUP BY s.id ORDER BY s.id`
   );
   return rows;
 }
 
 export async function getStore(id) {
-  const { rows } = await query("SELECT id, name, description, image_url FROM stores WHERE id = $1", [id]);
+  const { rows } = await query(
+    `SELECT s.id, s.name, s.description, s.image_url
+     FROM stores s
+     JOIN users u ON u.id = s.user_id
+     WHERE s.id = $1 AND u.is_active = true`,
+    [id]
+  );
   return rows[0] ?? null;
 }
 

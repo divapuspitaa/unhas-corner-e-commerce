@@ -49,10 +49,35 @@ export async function deleteUser(formData) {
   const admin = await requireUser("admin");
   const id = Number(formData.get("userId"));
   if (!isPosInt(id)) redirect(withMsg("/admin/users", "err", "ID pengguna tidak valid."));
-  if (id === admin.id) redirect(withMsg("/admin/users", "err", "Anda tidak bisa menghapus akun sendiri."));
+  if (id === admin.id) redirect(withMsg("/admin/users", "err", "Anda tidak bisa menonaktifkan akun sendiri."));
 
-  await query("DELETE FROM users WHERE id = $1", [id]);
-  redirect(withMsg("/admin/users", "ok", "Pengguna dihapus."));
+  // Cek apakah pengguna (sebagai seller maupun buyer) masih memiliki pesanan aktif
+  const { rows: activeOrders } = await query(
+    `SELECT o.id
+     FROM orders o
+     LEFT JOIN stores s ON o.store_id = s.id
+     WHERE (s.user_id = $1 OR o.buyer_id = $1)
+       AND o.status IN ('menunggu_pembayaran', 'diproses', 'dikirim')
+     LIMIT 1`,
+    [id]
+  );
+
+  if (activeOrders.length > 0) {
+    redirect(
+      withMsg(
+        "/admin/users",
+        "err",
+        "Gagal: Pengguna masih memiliki pesanan aktif yang belum selesai."
+      )
+    );
+  }
+
+  // Soft delete: nonaktifkan akun tanpa memutus relasi toko, produk, maupun riwayat transaksi
+  await query(
+    "UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1",
+    [id]
+  );
+  redirect(withMsg("/admin/users", "ok", "Akun pengguna dinonaktifkan."));
 }
 
 // ---------- Kategori ----------

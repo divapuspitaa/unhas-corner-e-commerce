@@ -6,8 +6,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCartCount, getCategories } from "@/lib/queries";
 import { logout } from "@/actions/auth";
 
-const KEYWORDS = ["Jas Almamater", "Toga", "Jaket KKN", "Drawing Pen", "Handscoon"];
-
 export default async function Navbar() {
   const [user, categories] = await Promise.all([getCurrentUser(), getCategories()]);
   const cartCount = user?.role === "buyer" ? await getCartCount(user.id) : 0;
@@ -43,122 +41,118 @@ export default async function Navbar() {
         : "/seller/pending";
 
   const CartBadge = cartCount > 0 && (
-    <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] font-bold text-white">
+    <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] font-bold text-white shadow-sm">
       {cartCount}
     </span>
   );
 
   return (
-    <>
-      {/* Baris tipis di paling atas (desktop) */}
-      <div className="hidden border-b border-line bg-surface text-xs text-muted md:block">
-        <div className="mx-auto flex max-w-7xl justify-between px-4 py-1.5">
-          <span>Marketplace resmi perlengkapan kampus Unhas</span>
-          <div className="flex gap-4">
-            <Link href="/toko" className="hover:text-primary">Toko Resmi</Link>
-            <Link href="/register" className="hover:text-primary">Jadi Seller</Link>
-          </div>
+    <header className="sticky top-0 z-40 border-b border-black/5 bg-white/75 backdrop-blur-xl transition-all">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <Link href="/" className="shrink-0 transition-transform duration-200 hover:scale-[1.02]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/logo.png" alt="UnhasCorner" className="h-9 w-auto" />
+        </Link>
+
+        {/* Dropdown kategori (desktop) */}
+        <details className="relative hidden shrink-0 md:block">
+          <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition-colors duration-200 hover:bg-primary-soft hover:text-primary">
+            <LuLayoutGrid size={16} /> Kategori
+          </summary>
+          <ul className="absolute left-0 top-full z-50 mt-2 w-64 rounded-2xl border border-black/5 bg-white/95 p-1.5 shadow-xl backdrop-blur-xl">
+            {categories.map((c) => (
+              <li key={c.id}>
+                <Link
+                  href={`/produk?category=${c.id}`}
+                  className="block rounded-xl px-3.5 py-2 text-sm transition-colors duration-150 hover:bg-primary-soft hover:text-primary"
+                >
+                  {c.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </details>
+
+        {/* Pencarian (desktop) */}
+        <div className="hidden min-w-0 flex-1 md:block">
+          <SearchBar />
+        </div>
+
+        {/* Menu kanan (desktop) */}
+        <nav className="ml-auto hidden shrink-0 items-center gap-1.5 md:flex">
+          {user?.role === "buyer" && (
+            <Link
+              href="/buyer/wishlist"
+              aria-label="Wishlist"
+              className="rounded-full p-2.5 transition-all duration-200 hover:bg-primary-soft hover:text-primary"
+            >
+              <LuHeart size={20} />
+            </Link>
+          )}
+          {(!user || user.role === "buyer") && (
+            <Link
+              href="/keranjang"
+              aria-label="Keranjang"
+              className="relative rounded-full p-2.5 transition-all duration-200 hover:bg-primary-soft hover:text-primary"
+            >
+              <LuShoppingCart size={20} />
+              {CartBadge}
+            </Link>
+          )}
+
+          <span className="mx-1.5 h-6 w-px bg-line/80" />
+
+          {!user && (
+            <>
+              <Link href="/login" className="btn btn-outline rounded-full">Masuk</Link>
+              <Link href="/register" className="btn btn-primary rounded-full">Daftar</Link>
+            </>
+          )}
+
+          {user?.role === "buyer" && (
+            <Link
+              href="/buyer/dashboard"
+              className="inline-flex items-center gap-1.5 rounded-full bg-surface/80 px-3.5 py-2 text-sm font-medium transition-all duration-200 hover:bg-primary-soft hover:text-primary"
+            >
+              <LuUser size={16} /> {user.name.split(" ")[0]}
+            </Link>
+          )}
+
+          {(user?.role === "seller" || user?.role === "admin") && (
+            <Link href={dashboardHref} className="btn btn-outline rounded-full">
+              <LuLayoutDashboard size={16} /> Dashboard
+            </Link>
+          )}
+
+          {user && (
+            <form action={logout}>
+              <button
+                aria-label="Keluar"
+                title="Keluar"
+                className="rounded-full p-2.5 text-muted transition-all duration-200 hover:bg-status-danger-bg hover:text-status-danger-text"
+              >
+                <LuLogOut size={20} />
+              </button>
+            </form>
+          )}
+        </nav>
+
+        {/* Menu kanan (HP) */}
+        <div className="ml-auto flex items-center gap-1 md:hidden">
+          {user?.role === "buyer" && (
+            <Link href="/keranjang" aria-label="Keranjang" className="relative rounded-full p-2">
+              <LuShoppingCart size={22} />
+              {CartBadge}
+            </Link>
+          )}
+          <MobileMenu links={links} loggedIn={Boolean(user)} />
         </div>
       </div>
 
-      <header className="sticky top-0 z-40 border-b border-line">
-        <div className="absolute inset-0 bg-white/90 backdrop-blur" />
-
-        <div className="relative mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
-          <Link href="/" className="shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo.png" alt="UnhasCorner" className="h-9 w-auto" />
-          </Link>
-
-          {/* Dropdown kategori (desktop) */}
-          <details className="relative hidden shrink-0 md:block">
-            <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-primary-soft">
-              <LuLayoutGrid size={16} /> Kategori
-            </summary>
-            <ul className="absolute left-0 top-full z-50 mt-1 w-60 rounded-lg border border-line bg-white p-1 shadow-lg">
-              {categories.map((c) => (
-                <li key={c.id}>
-                  <Link href={`/produk?category=${c.id}`} className="block rounded px-3 py-2 text-sm hover:bg-primary-soft">
-                    {c.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </details>
-
-          {/* Pencarian (desktop) + kata kunci populer */}
-          <div className="hidden min-w-0 flex-1 md:block">
-            <SearchBar />
-            <div className="mt-1 flex gap-3 overflow-hidden whitespace-nowrap text-xs text-muted">
-              {KEYWORDS.map((k) => (
-                <Link key={k} href={`/produk?q=${encodeURIComponent(k)}`} className="hover:text-primary">
-                  {k}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* Menu kanan (desktop) */}
-          <nav className="ml-auto hidden shrink-0 items-center gap-1 md:flex">
-            {user?.role === "buyer" && (
-              <Link href="/buyer/wishlist" aria-label="Wishlist" className="rounded-lg p-2 hover:bg-primary-soft">
-                <LuHeart size={20} />
-              </Link>
-            )}
-            {(!user || user.role === "buyer") && (
-              <Link href="/keranjang" aria-label="Keranjang" className="relative rounded-lg p-2 hover:bg-primary-soft">
-                <LuShoppingCart size={20} />
-                {CartBadge}
-              </Link>
-            )}
-
-            <span className="mx-2 h-6 w-px bg-line" />
-
-            {!user && (
-              <>
-                <Link href="/login" className="btn btn-outline">Masuk</Link>
-                <Link href="/register" className="btn btn-primary">Daftar</Link>
-              </>
-            )}
-
-            {user?.role === "buyer" && (
-              <Link href="/buyer/dashboard" className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-primary-soft">
-                <LuUser size={16} /> {user.name.split(" ")[0]}
-              </Link>
-            )}
-
-            {(user?.role === "seller" || user?.role === "admin") && (
-              <Link href={dashboardHref} className="btn btn-outline">
-                <LuLayoutDashboard size={16} /> Dashboard
-              </Link>
-            )}
-
-            {user && (
-              <form action={logout}>
-                <button aria-label="Keluar" title="Keluar" className="rounded-lg p-2 text-muted hover:bg-status-danger-bg hover:text-status-danger-text">
-                  <LuLogOut size={20} />
-                </button>
-              </form>
-            )}
-          </nav>
-
-          {/* Menu kanan (HP) */}
-          <div className="ml-auto flex items-center gap-1 md:hidden">
-            {user?.role === "buyer" && (
-              <Link href="/keranjang" aria-label="Keranjang" className="relative rounded-lg p-2">
-                <LuShoppingCart size={22} />
-                {CartBadge}
-              </Link>
-            )}
-            <MobileMenu links={links} loggedIn={Boolean(user)} />
-          </div>
-        </div>
-
-        {/* Pencarian (HP) */}
-        <div className="relative px-4 pb-3 md:hidden">
-          <SearchBar />
-        </div>
-      </header>
-    </>
+      {/* Pencarian (HP) */}
+      <div className="px-4 pb-3 md:hidden">
+        <SearchBar />
+      </div>
+    </header>
   );
 }

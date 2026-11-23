@@ -37,10 +37,12 @@ export const getCurrentUser = cache(async () => {
   try {
     const { payload } = await jwtVerify(token, secretKey());
     const { rows } = await query(
-      "SELECT id, name, email, phone, role, seller_status FROM users WHERE id = $1",
+      "SELECT id, name, email, phone, role, seller_status, is_active FROM users WHERE id = $1",
       [Number(payload.sub)]
     );
-    return rows[0] ?? null;
+    const user = rows[0];
+    if (!user || user.is_active === false) return null;
+    return user;
   } catch {
     return null;
   }
