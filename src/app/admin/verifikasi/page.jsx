@@ -1,4 +1,3 @@
-import Notice from "@/components/Notice";
 import { SellerBadge } from "@/components/Badge";
 import { query } from "@/lib/db";
 import { formatDate } from "@/lib/format";
@@ -19,7 +18,6 @@ export default async function VerificationPage({ searchParams }) {
   return (
     <div>
       <h2 className="mb-3 text-lg font-semibold">Verifikasi Seller</h2>
-      <Notice ok={sp.ok} err={sp.err} />
       {rows.length === 0 && <div className="card p-8 text-center text-muted">Tidak ada pendaftaran seller yang menunggu.</div>}
       <div className="space-y-3">
         {rows.map((u) => (

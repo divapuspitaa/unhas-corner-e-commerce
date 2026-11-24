@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./tailwind.generated.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ActivityToast from "@/components/ActivityToast";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta" });
@@ -16,6 +18,9 @@ export default function RootLayout({ children }) {
     <html lang="id" className={`${inter.variable} ${jakarta.variable}`}>
       <body className="min-h-screen antialiased" suppressHydrationWarning>
         <Navbar />
+        <Suspense fallback={null}>
+          <ActivityToast />
+        </Suspense>
         <main>{children}</main>
         <Footer />
       </body>

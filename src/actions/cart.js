@@ -19,8 +19,18 @@ export async function addToCart(formData) {
   if (!user) redirect(`/login?next=${encodeURIComponent(returnTo)}`);
   if (user.role !== "buyer") redirect(withMsg(returnTo, "err", "Hanya akun Buyer yang bisa berbelanja."));
 
-  const { rows } = await query("SELECT stock FROM products WHERE id = $1", [productId]);
+  const { rows } = await query(
+    `SELECT p.name, p.stock, u.is_active AS store_active
+     FROM products p
+     JOIN stores s ON s.id = p.store_id
+     JOIN users u ON u.id = s.user_id
+     WHERE p.id = $1`,
+    [productId]
+  );
   if (!rows[0]) redirect(withMsg(returnTo, "err", "Produk tidak ditemukan."));
+  if (rows[0].store_active === false) {
+    redirect(withMsg(returnTo, "err", "Toko sedang tidak aktif sementara."));
+  }
   if (rows[0].stock <= 0) redirect(withMsg(returnTo, "err", "Stok produk habis."));
 
   await query(
@@ -30,8 +40,10 @@ export async function addToCart(formData) {
     [user.id, productId, quantity, rows[0].stock]
   );
 
-  if (formData.get("mode") === "buy") redirect("/keranjang");
-  redirect(withMsg(returnTo, "ok", "Produk ditambahkan ke keranjang."));
+  if (formData.get("mode") === "buy") {
+    redirect(withMsg("/keranjang", "ok", `Keranjang Anda bertambah! "${rows[0].name}" siap dipesan.`));
+  }
+  redirect(withMsg(returnTo, "ok", `Keranjang Anda bertambah! "${rows[0].name}" berhasil ditambahkan.`));
 }
 
 export async function updateCartQty(formData) {
@@ -42,14 +54,15 @@ export async function updateCartQty(formData) {
 
   if (!Number.isFinite(qty) || qty < 1) {
     await query("DELETE FROM cart_items WHERE id = $1 AND user_id = $2", [id, user.id]);
+    redirect(withMsg("/keranjang", "ok", "Item berhasil dihapus dari keranjang."));
   } else {
     await query(
       `UPDATE cart_items c SET quantity = LEAST($1::int, p.stock)
        FROM products p WHERE c.id = $2 AND c.user_id = $3 AND p.id = c.product_id AND p.stock > 0`,
       [Math.floor(qty), id, user.id]
     );
+    redirect(withMsg("/keranjang", "ok", "Jumlah item di keranjang diperbarui."));
   }
-  redirect("/keranjang");
 }
 
 export async function removeCartItem(formData) {
@@ -57,6 +70,7 @@ export async function removeCartItem(formData) {
   const id = Number(formData.get("cartItemId"));
   if (isPosInt(id)) {
     await query("DELETE FROM cart_items WHERE id = $1 AND user_id = $2", [id, user.id]);
+    redirect(withMsg("/keranjang", "ok", "Item berhasil dihapus dari keranjang."));
   }
   redirect("/keranjang");
 }
@@ -79,8 +93,12 @@ export async function checkout(formData) {
 
       const items = (
         await client.query(
-          `SELECT ci.product_id, ci.quantity, p.name, p.price, p.stock, p.image_url, p.store_id
-           FROM cart_items ci JOIN products p ON p.id = ci.product_id
+          `SELECT ci.product_id, ci.quantity, p.name, p.price, p.stock, p.image_url, p.store_id,
+                  u.is_active AS store_active
+           FROM cart_items ci
+           JOIN products p ON p.id = ci.product_id
+           JOIN stores s ON s.id = p.store_id
+           JOIN users u ON u.id = s.user_id
            WHERE ci.user_id = $1 ORDER BY p.store_id FOR UPDATE OF p`,
           [user.id]
         )
@@ -88,6 +106,9 @@ export async function checkout(formData) {
       if (items.length === 0) throw new Error("Keranjang kosong.");
 
       for (const it of items) {
+        if (it.store_active === false) {
+          throw new Error(`Toko untuk "${it.name}" sedang dinonaktifkan sementara. Hapus item ini terlebih dahulu.`);
+        }
         if (it.quantity > it.stock) throw new Error(`Stok "${it.name}" tidak mencukupi (sisa ${it.stock}).`);
       }
 
@@ -136,5 +157,5 @@ export async function checkout(formData) {
   }
 
   if (failure) redirect(withMsg("/keranjang", "err", failure));
-  redirect(withMsg("/buyer/pesanan", "ok", "Checkout berhasil! Pesanan dibuat per toko."));
+  redirect(withMsg("/buyer/pesanan", "ok", "Checkout berhasil! Pesanan Anda telah dibuat."));
 }

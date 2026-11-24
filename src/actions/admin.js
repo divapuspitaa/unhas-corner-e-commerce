@@ -7,6 +7,14 @@ import { withMsg } from "@/lib/flash";
 
 const isPosInt = (n) => Number.isInteger(n) && n > 0;
 
+async function ensureReactivationColumns() {
+  await query(`
+    ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS reactivation_requested_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS reactivation_reason TEXT
+  `);
+}
+
 // ---------- Verifikasi seller ----------
 export async function setSellerStatus(formData) {
   await requireUser("admin");
@@ -25,19 +33,44 @@ export async function setSellerStatus(formData) {
 
 // ---------- Manajemen user ----------
 export async function updateUser(prevState, formData) {
-  await requireUser("admin");
+  const admin = await requireUser("admin");
+  await ensureReactivationColumns();
+
   const id = Number(formData.get("id"));
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const phone = String(formData.get("phone") ?? "").trim();
+  const isActiveRaw = formData.get("is_active");
+  const nextActive = isActiveRaw === null ? null : isActiveRaw === "true";
 
   if (!isPosInt(id)) return { error: "ID pengguna tidak valid." };
   if (name.length < 3) return { error: "Nama minimal 3 karakter." };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { error: "Format email tidak valid." };
   if (phone && !/^[0-9+\-\s]{8,20}$/.test(phone)) return { error: "Nomor telepon tidak valid." };
+  if (id === admin.id && nextActive === false) {
+    return { error: "Anda tidak bisa menonaktifkan akun sendiri." };
+  }
 
   try {
-    await query("UPDATE users SET name=$1, email=$2, phone=$3, updated_at=NOW() WHERE id=$4", [name, email, phone || null, id]);
+    if (nextActive === null) {
+      await query(
+        "UPDATE users SET name=$1, email=$2, phone=$3, updated_at=NOW() WHERE id=$4",
+        [name, email, phone || null, id]
+      );
+    } else {
+      await query(
+        `UPDATE users
+         SET name=$1,
+             email=$2,
+             phone=$3,
+             is_active=$4,
+             reactivation_requested_at = CASE WHEN $4 = true THEN NULL ELSE reactivation_requested_at END,
+             reactivation_reason = CASE WHEN $4 = true THEN NULL ELSE reactivation_reason END,
+             updated_at=NOW()
+         WHERE id=$5`,
+        [name, email, phone || null, nextActive, id]
+      );
+    }
   } catch (err) {
     if (err.code === "23505") return { error: "Email sudah dipakai pengguna lain." };
     throw err;
@@ -45,13 +78,15 @@ export async function updateUser(prevState, formData) {
   redirect(withMsg("/admin/users", "ok", "Data pengguna diperbarui."));
 }
 
+// Soft delete: menonaktifkan akun tanpa menghapus data user maupun produk
 export async function deleteUser(formData) {
   const admin = await requireUser("admin");
+  await ensureReactivationColumns();
+
   const id = Number(formData.get("userId"));
   if (!isPosInt(id)) redirect(withMsg("/admin/users", "err", "ID pengguna tidak valid."));
   if (id === admin.id) redirect(withMsg("/admin/users", "err", "Anda tidak bisa menonaktifkan akun sendiri."));
 
-  // Cek apakah pengguna (sebagai seller maupun buyer) masih memiliki pesanan aktif
   const { rows: activeOrders } = await query(
     `SELECT o.id
      FROM orders o
@@ -72,12 +107,55 @@ export async function deleteUser(formData) {
     );
   }
 
-  // Soft delete: nonaktifkan akun tanpa memutus relasi toko, produk, maupun riwayat transaksi
   await query(
-    "UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1",
+    `UPDATE users
+     SET is_active = false,
+         reactivation_requested_at = NULL,
+         reactivation_reason = NULL,
+         updated_at = NOW()
+     WHERE id = $1`,
     [id]
   );
   redirect(withMsg("/admin/users", "ok", "Akun pengguna dinonaktifkan."));
+}
+
+// Approve pengajuan aktivasi kembali
+export async function reactivateUser(formData) {
+  await requireUser("admin");
+  await ensureReactivationColumns();
+
+  const id = Number(formData.get("userId"));
+  if (!isPosInt(id)) redirect(withMsg("/admin/users", "err", "ID pengguna tidak valid."));
+
+  await query(
+    `UPDATE users
+     SET is_active = true,
+         reactivation_requested_at = NULL,
+         reactivation_reason = NULL,
+         updated_at = NOW()
+     WHERE id = $1`,
+    [id]
+  );
+  redirect(withMsg("/admin/users", "ok", "Akun pengguna berhasil diaktifkan kembali."));
+}
+
+// Reject pengajuan aktivasi kembali
+export async function rejectReactivation(formData) {
+  await requireUser("admin");
+  await ensureReactivationColumns();
+
+  const id = Number(formData.get("userId"));
+  if (!isPosInt(id)) redirect(withMsg("/admin/users", "err", "ID pengguna tidak valid."));
+
+  await query(
+    `UPDATE users
+     SET reactivation_requested_at = NULL,
+         reactivation_reason = NULL,
+         updated_at = NOW()
+     WHERE id = $1`,
+    [id]
+  );
+  redirect(withMsg("/admin/users", "ok", "Pengajuan aktivasi kembali ditolak."));
 }
 
 // ---------- Kategori ----------

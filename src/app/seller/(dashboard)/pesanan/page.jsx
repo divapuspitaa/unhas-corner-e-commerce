@@ -1,4 +1,3 @@
-import Notice from "@/components/Notice";
 import { StatusBadge } from "@/components/Badge";
 import { requireApprovedSeller } from "@/lib/auth";
 import { query } from "@/lib/db";
@@ -23,12 +22,11 @@ export default async function SellerOrdersPage({ searchParams }) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Pesanan Masuk</h2>
-      <Notice ok={sp.ok} err={sp.err} />
       {orders.length === 0 && <div className="card p-8 text-center text-muted">Belum ada pesanan masuk.</div>}
 
       {orders.map((o) => (
         <div key={o.id} className="card overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface px-4 py-3">
+          <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface px-4 py-3">
             <div>
               <p className="text-sm font-semibold">{o.order_code}</p>
               <p className="text-xs text-muted">{o.buyer_name} · {formatDate(o.created_at)}</p>
@@ -47,7 +45,7 @@ export default async function SellerOrdersPage({ searchParams }) {
             </p>
             {o.note && <p className="text-xs text-muted">Catatan: {o.note}</p>}
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line p-4">
+          <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-2 border-t border-line p-4">
             <p className="font-bold text-primary">{formatRupiah(o.total_price)}</p>
             <div className="flex gap-2">
               {NEXT_STATUS[o.status].map((s) => (

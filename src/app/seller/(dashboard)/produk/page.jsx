@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { LuPencil, LuPlus } from "react-icons/lu";
 import ConfirmButton from "@/components/ConfirmButton";
-import Notice from "@/components/Notice";
 import SafeImage from "@/components/SafeImage";
 import { requireApprovedSeller } from "@/lib/auth";
 import { query } from "@/lib/db";
@@ -27,7 +26,6 @@ export default async function SellerProductsPage({ searchParams }) {
         <h2 className="text-lg font-semibold">Produk Saya ({rows.length})</h2>
         <Link href="/seller/produk/baru" className="btn btn-primary"><LuPlus size={16} /> Tambah Produk</Link>
       </div>
-      <Notice ok={sp.ok} err={sp.err} />
 
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">

@@ -2,7 +2,7 @@ import { query } from "@/lib/db";
 
 const PRODUCT_SELECT = `
   SELECT p.id, p.name, p.description, p.price, p.stock, p.image_url, p.store_id, p.category_id,
-         s.name AS store_name, c.name AS category_name,
+         s.name AS store_name, u.is_active AS store_active, c.name AS category_name,
          COALESCE(r.avg_rating, 0) AS avg_rating, COALESCE(r.review_count, 0)::int AS review_count,
          COALESCE(sd.sold_count, 0)::int AS sold_count
   FROM products p
@@ -26,12 +26,12 @@ const SORTS = {
   termahal: "p.price DESC, p.id DESC",
   nama: "p.name ASC",
   rating: "avg_rating DESC, review_count DESC",
-  terlaris: "sold_count DESC, p.id DESC"
+  terlaris: "sold_count DESC, p.id DESC",
 };
 
 export const PAGE_SIZE = 12;
 
-// Daftar produk dengan pencarian, filter kategori/toko/harga, sorting, dan pagination
+// Daftar produk publik (hanya dari toko dengan akun aktif)
 export async function listProducts({ q, category, store, minPrice, maxPrice, sort = "terbaru", page = 1 } = {}) {
   const where = ["u.is_active = true"];
   const params = [];
@@ -74,7 +74,7 @@ export async function listProducts({ q, category, store, minPrice, maxPrice, sor
   return { products: rows, total: countRes.rows[0].total };
 }
 
-// Rekomendasi untuk homepage (urutan tetap agar tidak bergeser saat klik wishlist)
+// Rekomendasi untuk homepage
 export async function randomProducts(limit = 8) {
   const { rows } = await query(
     `${PRODUCT_SELECT} WHERE u.is_active = true AND p.stock > 0 ORDER BY hashtext(p.id::text) LIMIT $1`,
@@ -92,8 +92,9 @@ export async function topProducts(limit = 10) {
   return rows;
 }
 
+// Detail produk tetap bisa diakses dari riwayat transaksi meski toko sedang nonaktif
 export async function getProduct(id) {
-  const { rows } = await query(`${PRODUCT_SELECT} WHERE p.id = $1 AND u.is_active = true`, [id]);
+  const { rows } = await query(`${PRODUCT_SELECT} WHERE p.id = $1`, [id]);
   return rows[0] ?? null;
 }
 

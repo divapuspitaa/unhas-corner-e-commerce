@@ -41,7 +41,7 @@ export default function HeroBanner() {
   return (
     <section
       aria-label="Banner Promo UnhasCorner"
-      className="group relative w-full overflow-hidden bg-[#4A0707]"
+      className="group relative w-full overflow-hidden rounded-2xl border border-line/80 bg-[#4A0707] shadow-md"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -87,14 +87,13 @@ export default function HeroBanner() {
                 </Link>
               )}
 
-              {/* Vignette tipis di tepi bawah agar indikator menyatu natural */}
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/35 to-transparent" />
             </div>
           );
         })}
       </div>
 
-      {/* Indikator kapsul glassmorphism di bagian bawah */}
+      {/* Indikator kapsul glassmorphism */}
       <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-black/25 px-3 py-1.5 backdrop-blur-md sm:bottom-4">
         {BANNERS.map((banner, index) => (
           <button
@@ -111,24 +110,24 @@ export default function HeroBanner() {
         ))}
       </div>
 
-      {/* Tombol panah kiri (glassmorphism, muncul halus saat hover) */}
+      {/* Tombol panah kiri */}
       <button
         type="button"
         onClick={prevSlide}
         aria-label="Banner sebelumnya"
-        className="absolute top-1/2 left-3 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white opacity-80 shadow-lg backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-black/50 hover:opacity-100 md:left-6 md:h-11 md:w-11"
+        className="absolute top-1/2 left-3 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white opacity-80 shadow-lg backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-black/50 hover:opacity-100 md:left-4 md:h-10 md:w-10"
       >
-        <LuChevronLeft size={22} />
+        <LuChevronLeft size={20} />
       </button>
 
-      {/* Tombol panah kanan (glassmorphism, muncul halus saat hover) */}
+      {/* Tombol panah kanan */}
       <button
         type="button"
         onClick={nextSlide}
         aria-label="Banner berikutnya"
-        className="absolute top-1/2 right-3 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white opacity-80 shadow-lg backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-black/50 hover:opacity-100 md:right-6 md:h-11 md:w-11"
+        className="absolute top-1/2 right-3 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/30 text-white opacity-80 shadow-lg backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-black/50 hover:opacity-100 md:right-4 md:h-10 md:w-10"
       >
-        <LuChevronRight size={22} />
+        <LuChevronRight size={20} />
       </button>
     </section>
   );

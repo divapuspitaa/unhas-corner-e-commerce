@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { LuStore, LuHeart, LuStar } from "react-icons/lu";
+import { LuStore, LuStar } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
 import SubmitButton from "@/components/SubmitButton";
+import WishlistButton from "@/components/WishlistButton";
 import { addToCart } from "@/actions/cart";
-import { toggleWishlist } from "@/actions/wishlist";
 import { formatRupiah } from "@/lib/format";
 
 export default function ProductCard({ product, user, wished = false, returnTo = "/" }) {
@@ -23,13 +23,7 @@ export default function ProductCard({ product, user, wished = false, returnTo = 
       </Link>
 
       {user?.role === "buyer" && (
-        <form action={toggleWishlist} className="absolute right-2 top-2">
-          <input type="hidden" name="productId" value={p.id} />
-          <input type="hidden" name="returnTo" value={returnTo} />
-          <button type="submit" aria-label="Wishlist" className="rounded-full bg-white/90 p-1.5 shadow hover:bg-white">
-            <LuHeart size={16} className={wished ? "fill-primary text-primary" : "text-muted"} />
-          </button>
-        </form>
+        <WishlistButton productId={p.id} initialWished={wished} />
       )}
 
       <div className="flex flex-1 flex-col space-y-1 p-2.5">
@@ -46,7 +40,7 @@ export default function ProductCard({ product, user, wished = false, returnTo = 
           {p.sold_count > 0 && <span>· {p.sold_count} terjual</span>}
         </p>
 
-      {canBuy && (
+        {canBuy && (
           <form action={addToCart} className="mt-auto pt-2">
             <input type="hidden" name="productId" value={p.id} />
             <input type="hidden" name="quantity" value="1" />

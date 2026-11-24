@@ -1,6 +1,5 @@
 import Link from "next/link";
 import ConfirmButton from "@/components/ConfirmButton";
-import Notice from "@/components/Notice";
 import ReviewForm from "@/components/ReviewForm";
 import SafeImage from "@/components/SafeImage";
 import { StatusBadge } from "@/components/Badge";
@@ -33,7 +32,6 @@ export default async function BuyerOrdersPage({ searchParams }) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Riwayat Pesanan</h2>
-      <Notice ok={sp.ok} err={sp.err} />
       {orders.length === 0 && (
         <div className="card p-8 text-center text-muted">
           Belum ada pesanan. <Link href="/produk" className="font-semibold text-primary">Belanja sekarang</Link>
@@ -42,7 +40,7 @@ export default async function BuyerOrdersPage({ searchParams }) {
 
       {orders.map((o) => (
         <div key={o.id} className="card overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface px-4 py-3">
+          <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface px-4 py-3">
             <div>
               <p className="text-sm font-semibold">{o.order_code}</p>
               <p className="text-xs text-muted">{o.store_name} · {formatDate(o.created_at)}</p>
@@ -90,7 +88,7 @@ export default async function BuyerOrdersPage({ searchParams }) {
               </ol>
             </details>
 
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-2">
               <p className="font-bold text-primary">Total: {formatRupiah(o.total_price)}</p>
               <div className="flex gap-2">
                 {o.status === "menunggu_pembayaran" && (

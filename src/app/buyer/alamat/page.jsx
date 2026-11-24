@@ -1,6 +1,5 @@
 import AddressForm from "@/components/AddressForm";
 import ConfirmButton from "@/components/ConfirmButton";
-import Notice from "@/components/Notice";
 import { requireUser } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { deleteAddress, setDefaultAddress } from "@/actions/profile";
@@ -16,7 +15,6 @@ export default async function AddressPage({ searchParams }) {
   return (
     <div className="space-y-5">
       <h2 className="text-lg font-semibold">Alamat Pengiriman</h2>
-      <Notice ok={sp.ok} err={sp.err} />
       <div className="grid gap-3 md:grid-cols-2">
         {rows.length === 0 && <p className="text-sm text-muted">Belum ada alamat tersimpan.</p>}
         {rows.map((a) => (

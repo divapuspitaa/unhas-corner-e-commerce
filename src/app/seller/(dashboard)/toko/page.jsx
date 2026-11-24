@@ -1,5 +1,4 @@
 import StoreForm from "@/components/StoreForm";
-import Notice from "@/components/Notice";
 import { requireApprovedSeller } from "@/lib/auth";
 import { getStoreByUser } from "@/lib/queries";
 
@@ -13,7 +12,6 @@ export default async function SellerStorePage({ searchParams }) {
   return (
     <div>
       <h2 className="mb-3 text-lg font-semibold">Informasi Toko</h2>
-      <Notice ok={sp.ok} err={sp.err} />
       <StoreForm store={store} />
     </div>
   );

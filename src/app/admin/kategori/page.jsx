@@ -1,4 +1,3 @@
-import Notice from "@/components/Notice";
 import { getCategories } from "@/lib/queries";
 import { deleteCategory, saveCategory } from "@/actions/admin";
 
@@ -12,7 +11,6 @@ export default async function AdminCategoriesPage({ searchParams }) {
   return (
     <div className="space-y-5">
       <h2 className="text-lg font-semibold">Kategori Produk</h2>
-      <Notice ok={sp.ok} err={sp.err} />
 
       <form action={saveCategory} className="card grid gap-3 p-4 sm:grid-cols-[1fr_2fr_auto] sm:items-end">
         <div>

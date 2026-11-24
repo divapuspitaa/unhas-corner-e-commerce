@@ -1,6 +1,5 @@
 import Link from "next/link";
 import ConfirmButton from "@/components/ConfirmButton";
-import Notice from "@/components/Notice";
 import { query } from "@/lib/db";
 import { formatRupiah } from "@/lib/format";
 import { adminDeleteProduct } from "@/actions/admin";
@@ -21,8 +20,7 @@ export default async function AdminProductsPage({ searchParams }) {
   return (
     <div>
       <h2 className="mb-3 text-lg font-semibold">Moderasi Produk</h2>
-      <Notice ok={sp.ok} err={sp.err} />
-      <form className="mb-3 flex gap-2">
+      <form className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-3 shadow-sm backdrop-blur-mdmb-3 flex gap-2">
         <input name="q" defaultValue={q} placeholder="Cari produk..." className="input max-w-xs" />
         <button className="btn btn-outline">Cari</button>
       </form>
