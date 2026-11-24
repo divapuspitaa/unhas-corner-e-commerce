@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { query, withTransaction } from "@/lib/db";
 import { getCurrentUser, requireUser, safePath } from "@/lib/auth";
@@ -45,6 +46,8 @@ export async function addToCart(formData) {
     [user.id, productId, quantity, rows[0].stock, isBuyNow]
   );
 
+  revalidatePath("/", "layout");
+
   // Beli langsung -> masuk ke halaman checkout hanya untuk produk ini
   if (isBuyNow) {
     redirect(`/checkout?items=${saved[0].id}`);
@@ -60,6 +63,7 @@ export async function updateCartQty(formData) {
 
   if (!Number.isFinite(qty) || qty < 1) {
     await query("DELETE FROM cart_items WHERE id = $1 AND user_id = $2", [id, user.id]);
+    revalidatePath("/", "layout");
     redirect(withMsg("/keranjang", "ok", "Item berhasil dihapus dari keranjang."));
   } else {
     await query(
@@ -67,6 +71,7 @@ export async function updateCartQty(formData) {
        FROM products p WHERE c.id = $2 AND c.user_id = $3 AND p.id = c.product_id AND p.stock > 0`,
       [Math.floor(qty), id, user.id]
     );
+    revalidatePath("/", "layout");
     redirect(withMsg("/keranjang", "ok", "Jumlah item di keranjang diperbarui."));
   }
 }
@@ -76,6 +81,7 @@ export async function removeCartItem(formData) {
   const id = Number(formData.get("cartItemId"));
   if (isPosInt(id)) {
     await query("DELETE FROM cart_items WHERE id = $1 AND user_id = $2", [id, user.id]);
+    revalidatePath("/", "layout");
     redirect(withMsg("/keranjang", "ok", "Item berhasil dihapus dari keranjang."));
   }
   redirect("/keranjang");
@@ -174,5 +180,6 @@ export async function checkout(formData) {
   }
 
   if (failure) redirect(withMsg(backTo, "err", failure));
+  revalidatePath("/", "layout");
   redirect(withMsg("/buyer/pesanan", "ok", "Checkout berhasil! Pesanan Anda telah dibuat."));
 }
