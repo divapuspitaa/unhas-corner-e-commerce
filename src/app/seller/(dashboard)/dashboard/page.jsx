@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   LuPackage,
-  LuLayers,
+  LuTriangleAlert,
   LuClock,
   LuWallet,
   LuPlus,
@@ -13,9 +13,9 @@ import { StatusBadge } from "@/components/Badge";
 import { requireApprovedSeller } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { getStoreByUser } from "@/lib/queries";
-import { formatDate, formatRupiah } from "@/lib/format";
+import { LOW_STOCK_LIMIT, formatDate, formatRupiah } from "@/lib/format";
 
-export const metadata = { title: "Ringkasan Toko" };
+export const metadata = { title: "Dashboard Toko" };
 export const dynamic = "force-dynamic";
 
 export default async function SellerHome() {
@@ -39,8 +39,11 @@ export default async function SellerHome() {
     );
   }
 
-  const [{ rows: prod }, { rows: ord }, { rows: rev }, { rows: recentOrders }] = await Promise.all([
-    query("SELECT COUNT(*)::int AS n, COALESCE(SUM(stock),0)::int AS stock FROM products WHERE store_id = $1", [store.id]),
+  const [{ rows: prod }, { rows: ord }, { rows: rev }, { rows: recentOrders }, { rows: lowStock }] = await Promise.all([
+    query(
+      "SELECT COUNT(*)::int AS n, COUNT(*) FILTER (WHERE stock <= $2)::int AS low FROM products WHERE store_id = $1",
+      [store.id, LOW_STOCK_LIMIT]
+    ),
     query("SELECT status, COUNT(*)::int AS n FROM orders WHERE store_id = $1 GROUP BY status", [store.id]),
     query("SELECT COALESCE(SUM(total_price),0) AS total FROM orders WHERE store_id = $1 AND status = 'selesai'", [store.id]),
     query(
@@ -52,6 +55,13 @@ export default async function SellerHome() {
        LIMIT 5`,
       [store.id]
     ),
+    // Produk dengan stok menipis, diurutkan berdasarkan stok (paling sedikit) lalu harga (tertinggi)
+    query(
+      `SELECT id, name, stock, price FROM products
+       WHERE store_id = $1 AND stock <= $2
+       ORDER BY stock ASC, price DESC, id DESC`,
+      [store.id, LOW_STOCK_LIMIT]
+    ),
   ]);
 
   const byStatus = Object.fromEntries(ord.map((o) => [o.status, o.n]));
@@ -59,28 +69,28 @@ export default async function SellerHome() {
 
   const stats = [
     { label: "Total Produk", value: prod[0].n, href: "/seller/produk", icon: LuPackage },
-    { label: "Total Stok Tersedia", value: prod[0].stock, href: "/seller/produk", icon: LuLayers },
-    { label: "Perlu Diproses", value: needAction, href: "/seller/pesanan", icon: LuClock },
+    { label: `Stok Menipis (≤ ${LOW_STOCK_LIMIT})`, value: prod[0].low, href: "/seller/produk", icon: LuTriangleAlert, warn: prod[0].low > 0 },
+    { label: "Perlu Diproses", value: needAction, href: "/seller/pesanan?tab=berjalan", icon: LuClock },
     { label: "Pendapatan Selesai", value: formatRupiah(rev[0].total), href: "/seller/pesanan", icon: LuWallet },
   ];
 
   return (
     <div className="space-y-5">
       {/* Header Profil Toko & Aksi Cepat */}
-      <div className="card flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-primary-soft/60 via-white to-white p-5">
+      <div className="card flex flex-wrap items-center justify-between gap-4 border-primary bg-primary p-5">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-ink">{store.name}</h2>
+            <h2 className="text-lg font-bold text-white">{store.name}</h2>
             <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
               Toko Aktif
             </span>
           </div>
-          <p className="mt-1 line-clamp-2 text-sm text-muted">
+          <p className="mt-1 line-clamp-2 text-sm text-white/85">
             {store.description || "Kelola katalog produk dan pesanan mahasiswa Universitas Hasanuddin."}
           </p>
         </div>
 
-        <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 rounded-2xl bg-white p-2.5">
           <Link href="/seller/produk/baru" className="btn btn-primary btn-sm rounded-full">
             <LuPlus size={15} /> Tambah Produk
           </Link>
@@ -92,7 +102,7 @@ export default async function SellerHome() {
 
       {/* Kartu Statistik Toko */}
       <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
-        {stats.map(({ label, value, href, icon: Icon }) => (
+        {stats.map(({ label, value, href, icon: Icon, warn }) => (
           <Link
             key={label}
             href={href}
@@ -100,14 +110,50 @@ export default async function SellerHome() {
           >
             <div className="min-w-0">
               <p className="text-xs font-medium text-muted">{label}</p>
-              <p className="mt-1 truncate text-xl font-bold text-primary">{value}</p>
+              <p className={`mt-1 truncate text-xl font-bold ${warn ? "text-yellow-500" : "text-primary"}`}>{value}</p>
             </div>
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary transition-transform group-hover:scale-105">
+            <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105 ${warn ? "bg-yellow-100 text-yellow-500" : "bg-primary-soft text-primary"}`}>
               <Icon size={20} />
             </span>
           </Link>
         ))}
       </div>
+
+      {/* Peringatan stok menipis */}
+      {lowStock.length > 0 && (
+        <div className="card border-yellow-300 bg-yellow-50/60 p-5">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h3 className="flex items-center gap-2 font-bold text-ink">
+              <LuTriangleAlert size={18} className="text-yellow-500" />
+              Peringatan: {lowStock.length} produk stoknya menipis (≤ {LOW_STOCK_LIMIT})
+            </h3>
+            <Link
+              href="/seller/produk"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            >
+              Kelola produk <LuArrowRight size={13} />
+            </Link>
+          </div>
+          <p className="mb-2 text-xs text-muted">Diurutkan berdasarkan stok paling sedikit, lalu harga tertinggi. Segera tambah stok agar tidak kehabisan.</p>
+          <div className="divide-y divide-yellow-200/80">
+            {lowStock.slice(0, 8).map((p) => (
+              <Link
+                key={p.id}
+                href={`/seller/produk/${p.id}/edit`}
+                className="flex items-center justify-between gap-3 py-2.5 text-sm transition-colors first:pt-1 last:pb-1 hover:text-primary"
+              >
+                <span className="min-w-0 truncate font-medium text-ink">{p.name}</span>
+                <span className="flex shrink-0 items-center gap-3">
+                  <span className="text-xs text-muted">{formatRupiah(p.price)}</span>
+                  <span className="rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-bold text-yellow-600">
+                    {p.stock === 0 ? "Habis" : `Sisa ${p.stock}`}
+                  </span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Daftar Pesanan Masuk Terbaru */}
       <div className="card p-5">

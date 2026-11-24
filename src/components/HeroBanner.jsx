@@ -6,15 +6,14 @@ import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 
 const BANNERS = [
   {
-    src: "/images/banners/banner-2-stiker.png",
-    alt: "Unhasku bersatu, Unhasku kuat",
-    href: "/toko",
-  },
-  {
     src: "/images/banners/banner-3-logo-unhas.png",
     alt: "Bangga jadi bagian dari Universitas Hasanuddin",
     href: "/produk",
     ctaText: "Belanja Sekarang",
+  },
+  {
+    src: "/images/banners/banner-2-stiker.png",
+    alt: "Unhasku bersatu, Unhasku kuat",
   },
 ];
 
@@ -65,17 +64,13 @@ export default function HeroBanner() {
                   />
                   <Link
                     href={banner.href}
-                    className="absolute top-[82%] left-[5.2%] z-20 inline-flex items-center justify-center rounded-md bg-[#C59E56] px-3 py-1 text-[10px] font-bold text-[#6E0D0D] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#d7b269] hover:shadow-[0_10px_25px_rgba(197,158,86,0.5)] active:translate-y-0 sm:top-[83%] sm:rounded-lg sm:px-5 sm:py-1.5 sm:text-xs md:px-7 md:py-2.5 md:text-sm"
+                    className="absolute top-[82%] left-[5.2%] z-20 inline-flex items-center justify-center rounded-md bg-accent px-3 py-1 text-[10px] font-bold text-[#6E0D0D] shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#ffc61a] hover:shadow-[0_10px_25px_rgba(240,180,0,0.5)] active:translate-y-0 sm:top-[83%] sm:rounded-lg sm:px-5 sm:py-1.5 sm:text-xs md:px-7 md:py-2.5 md:text-sm"
                   >
                     {banner.ctaText}
                   </Link>
                 </>
               ) : (
-                <Link
-                  href={banner.href}
-                  className="block w-full"
-                  aria-label={banner.alt}
-                >
+                <div className="block w-full">
                   <img
                     src={banner.src}
                     alt={banner.alt}
@@ -84,7 +79,7 @@ export default function HeroBanner() {
                       isActive ? "scale-100" : "scale-[1.03]"
                     }`}
                   />
-                </Link>
+                </div>
               )}
 
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/35 to-transparent" />
@@ -103,7 +98,7 @@ export default function HeroBanner() {
             aria-label={`Tampilkan banner ${index + 1}`}
             className={`h-2 rounded-full transition-all duration-300 ${
               current === index
-                ? "w-6 bg-[#C59E56]"
+                ? "w-6 bg-accent"
                 : "w-2 bg-white/60 hover:bg-white"
             }`}
           />

@@ -22,8 +22,8 @@ export default function NotFound() {
         </p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link href="/" className="btn btn-primary">
-            <LuArrowLeft size={16} /> Kembali ke Beranda
+          <Link href="/" className="btn btn-primary rounded-full px-5">
+            Kembali ke Beranda
           </Link>
           <Link href="/produk" className="btn btn-outline">
             <LuShoppingBag size={16} /> Lihat Katalog

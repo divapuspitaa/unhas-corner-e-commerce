@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { LuImagePlus, LuUpload } from "react-icons/lu";
 import SubmitButton from "@/components/SubmitButton";
 import { createProduct, updateProduct } from "@/actions/products";
@@ -11,6 +11,29 @@ export default function ProductForm({ categories, product }) {
   const [fileName, setFileName] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
+  const categoryRef = useRef(null);
+
+  // Field dikontrol lewat state agar isian TIDAK hilang saat form gagal disimpan
+  // (mis. foto produk lupa diunggah)
+  const [values, setValues] = useState({
+    name: product?.name ?? "",
+    description: product?.description ?? "",
+    price: product?.price ?? "",
+    stock: product?.stock ?? "",
+    category_id: product?.category_id ?? "",
+  });
+  const setField = (key) => (e) => setValues((v) => ({ ...v, [key]: e.target.value }));
+
+  // Jika server menolak, input file selalu dikosongkan browser: samakan pratinjau dengan kondisi sebenarnya
+  useEffect(() => {
+    // Pastikan pilihan kategori tetap tampil setelah form di-reset otomatis oleh React
+    if (state?.error && categoryRef.current) categoryRef.current.value = String(values.category_id ?? "");
+    if (state?.error && !fileInputRef.current?.files?.length) {
+      setFileName("");
+      setPreviewUrl(product?.image_url ?? "");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, product?.image_url]);
 
   const handleFileSelect = (file) => {
     if (!file) return;
@@ -44,7 +67,8 @@ export default function ProductForm({ categories, product }) {
         <input
           id="name"
           name="name"
-          defaultValue={product?.name ?? ""}
+          value={values.name}
+          onChange={setField("name")}
           required
           placeholder="Contoh: Jas Almamater Unhas / Jas Lab Lengan Panjang"
           className="input"
@@ -56,7 +80,8 @@ export default function ProductForm({ categories, product }) {
         <textarea
           id="description"
           name="description"
-          defaultValue={product?.description ?? ""}
+          value={values.description}
+          onChange={setField("description")}
           required
           rows={4}
           placeholder="Tuliskan spesifikasi bahan, ukuran yang tersedia, kondisi produk, serta informasi pengambilan di kampus..."
@@ -72,7 +97,8 @@ export default function ProductForm({ categories, product }) {
             name="price"
             type="number"
             min="0"
-            defaultValue={product?.price ?? ""}
+            value={values.price}
+            onChange={setField("price")}
             required
             placeholder="Contoh: 150000"
             className="input"
@@ -86,7 +112,8 @@ export default function ProductForm({ categories, product }) {
             type="number"
             min="0"
             step="1"
-            defaultValue={product?.stock ?? ""}
+            value={values.stock}
+            onChange={setField("stock")}
             required
             placeholder="Contoh: 25"
             className="input"
@@ -95,9 +122,11 @@ export default function ProductForm({ categories, product }) {
         <div>
           <label className="label" htmlFor="category_id">Kategori</label>
           <select
+            ref={categoryRef}
             id="category_id"
             name="category_id"
-            defaultValue={product?.category_id ?? ""}
+            value={values.category_id}
+            onChange={setField("category_id")}
             required
             className="input"
           >
@@ -167,6 +196,7 @@ export default function ProductForm({ categories, product }) {
             name="image"
             type="file"
             accept="image/png,image/jpeg,image/webp"
+            required={!product?.image_url}
             onChange={(e) => handleFileSelect(e.target.files?.[0])}
             className="sr-only"
           />

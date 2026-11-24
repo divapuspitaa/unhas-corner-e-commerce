@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LuStore, LuSparkles, LuArrowUpRight } from "react-icons/lu";
+import { LuStore } from "react-icons/lu";
 import HeroBanner from "@/components/HeroBanner";
 import ProductCard from "@/components/ProductCard";
 import { getCurrentUser } from "@/lib/auth";
@@ -16,41 +16,42 @@ export default async function HomePage() {
     getStores(),
     getWishlistIds(user?.role === "buyer" ? user.id : null),
   ]);
-  const hasSales = top.some((p) => p.sold_count > 0);
+  // Produk terlaris = urut dari jumlah terjual terbanyak (hanya yang sudah pernah terjual)
+  const bestSellers = top.filter((p) => p.sold_count > 0);
+  const hasSales = bestSellers.length > 0;
 
   return (
-    <div className="mx-auto max-w-[1480px] space-y-8 px-4 pt-5 pb-12 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-1480px space-y-8 px-4 pt-5 pb-2 sm:px-6 lg:px-8">
       {/* Hero Banner sejajar lurus dengan batas kiri-kanan Navbar */}
       <HeroBanner />
 
       {/* Spotlight Produk Terlaris */}
       {hasSales && (
-        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#6E0D0D] via-[#871414] to-[#450707] p-5 shadow-lg md:p-7">
-          <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-[#C59E56]/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-black/30 blur-3xl" />
+        <section className="relative overflow-hidden rounded-2xl bg-primary p-5 shadow-lg md:p-7">
 
           <div className="relative mb-5 flex flex-wrap items-end justify-between gap-2">
             <div>
-              <span className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-[#C59E56]/40 bg-[#C59E56]/15 px-3 py-0.5 text-xs font-semibold text-[#F3D596]">
-                <LuSparkles size={13} /> Pilihan Favorit Mahasiswa
-              </span>
               <h2 className="text-xl font-bold text-white md:text-2xl">Produk Terlaris</h2>
+              <p className="mt-1 text-xs text-white/85 md:text-sm">
+                Diurutkan berdasarkan <strong className="text-accent">jumlah terjual terbanyak</strong> (dari pesanan yang
+                sudah selesai). Jika jumlah terjual sama, produk dengan rating lebih tinggi (skala 1–5) tampil lebih dulu.
+              </p>
             </div>
             <Link
               href="/produk?sort=terlaris"
-              className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/20 sm:text-sm"
+              className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2 text-xs font-bold text-primary shadow-md transition hover:bg-accent hover:text-primary-dark sm:text-sm"
             >
-              Lihat semua <LuArrowUpRight size={15} />
+              Lihat semua
             </Link>
           </div>
 
-          <div className="relative flex snap-x snap-mandatory no-scrollbar flex gap-3.5 overflow-x-auto pb-2">
-            {top.map((p) => (
+          <div className="relative flex snap-x snap-mandatory no-scrollbar gap-3.5 overflow-x-auto pb-2">
+            {bestSellers.map((p, idx) => (
               <div
                 key={p.id}
                 className="w-44 shrink-0 snap-start transition-transform duration-300 hover:-translate-y-1 sm:w-48"
               >
-                <ProductCard product={p} user={user} wished={wished.has(p.id)} returnTo="/" />
+                <ProductCard product={p} user={user} wished={wished.has(p.id)} returnTo="/" showStats rank={idx + 1} />
               </div>
             ))}
           </div>
@@ -66,9 +67,9 @@ export default async function HomePage() {
           </div>
           <Link
             href="/toko"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:opacity-80"
+            className="btn btn-primary btn-sm rounded-full px-5"
           >
-            Lihat semua <LuArrowUpRight size={16} />
+            Lihat semua
           </Link>
         </div>
 
@@ -79,13 +80,13 @@ export default async function HomePage() {
               href={`/toko/${s.id}`}
               className="group flex items-start gap-3.5 rounded-xl border border-line/80 bg-surface/30 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:bg-white hover:shadow-lg"
             >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[#4A0707] text-sm font-bold text-white shadow-sm transition-transform duration-300 group-hover:scale-105">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white shadow-sm transition-transform duration-300 group-hover:scale-105">
                 {s.name.slice(0, 2).toUpperCase()}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="flex items-center gap-1.5 text-sm font-semibold transition-colors group-hover:text-primary">
                   <span className="truncate">{s.name}</span>
-                  <span className="shrink-0 rounded-full bg-accent-soft px-2 py-0.5 text-[10px] font-bold text-accent">
+                  <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[10px] font-extrabold text-primary-dark">
                     OFFICIAL
                   </span>
                 </p>
@@ -103,7 +104,7 @@ export default async function HomePage() {
       <section>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-bold md:text-2xl">Untuk Anda</h2>
-          <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+          <div className="no-scrollbar flex gap-2 overflow-x-auto px-1 py-1.5">
             <span className="shrink-0 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-white shadow-sm">
               Semua Pilihan
             </span>
@@ -111,7 +112,7 @@ export default async function HomePage() {
               <Link
                 key={c.id}
                 href={`/produk?category=${c.id}`}
-                className="shrink-0 rounded-full border border-line bg-white px-4 py-1.5 text-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:text-primary hover:shadow-sm"
+                className="shrink-0 rounded-full border border-line bg-white px-4 py-1.5 text-sm transition-colors duration-200 hover:border-primary hover:bg-primary-soft hover:text-primary"
               >
                 {c.name}
               </Link>

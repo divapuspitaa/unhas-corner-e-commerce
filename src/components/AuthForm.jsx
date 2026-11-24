@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LuShieldAlert, LuSend, LuCircleCheck } from "react-icons/lu";
+import { LuShieldAlert, LuSend, LuCircleCheck, LuEye, LuEyeOff } from "react-icons/lu";
 import { requestAccountReactivation } from "@/actions/auth";
 
 function useAuthSubmit(endpoint) {
@@ -52,6 +52,32 @@ const ErrorBox = ({ msg }) =>
       {msg}
     </p>
   ) : null;
+
+function PasswordInput({ id, name, placeholder, minLength }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        id={id}
+        name={name}
+        type={show ? "text" : "password"}
+        required
+        minLength={minLength}
+        className="input pr-10"
+        placeholder={placeholder}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((v) => !v)}
+        aria-label={show ? "Sembunyikan password" : "Tampilkan password"}
+        title={show ? "Sembunyikan password" : "Tampilkan password"}
+        className="absolute top-1/2 right-2 -translate-y-1/2 rounded-md p-1.5 text-muted transition-colors hover:text-primary"
+      >
+        {show ? <LuEyeOff size={18} /> : <LuEye size={18} />}
+      </button>
+    </div>
+  );
+}
 
 export function LoginForm({ next }) {
   const { error, pending, submit, deactivatedData, setDeactivatedData } = useAuthSubmit("/api/login");
@@ -108,14 +134,7 @@ export function LoginForm({ next }) {
         </div>
         <div>
           <label className="label" htmlFor="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            className="input"
-            placeholder="Masukkan password akun Anda"
-          />
+          <PasswordInput id="password" name="password" placeholder="Masukkan password akun Anda" />
         </div>
         <button type="submit" disabled={pending} className="btn btn-primary w-full">
           {pending ? "Masuk..." : "Masuk"}
@@ -257,27 +276,11 @@ export function RegisterForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="label" htmlFor="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            minLength={6}
-            className="input"
-            placeholder="Minimal 6 karakter"
-          />
+          <PasswordInput id="password" name="password" minLength={6} placeholder="Minimal 6 karakter" />
         </div>
         <div>
           <label className="label" htmlFor="confirm">Konfirmasi</label>
-          <input
-            id="confirm"
-            name="confirm"
-            type="password"
-            required
-            minLength={6}
-            className="input"
-            placeholder="Ulangi password"
-          />
+          <PasswordInput id="confirm" name="confirm" minLength={6} placeholder="Ulangi password" />
         </div>
       </div>
       <button type="submit" disabled={pending} className="btn btn-primary w-full">

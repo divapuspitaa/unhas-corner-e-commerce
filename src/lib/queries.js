@@ -86,7 +86,7 @@ export async function randomProducts(limit = 8) {
 // Produk terlaris untuk homepage
 export async function topProducts(limit = 10) {
   const { rows } = await query(
-    `${PRODUCT_SELECT} WHERE u.is_active = true AND p.stock > 0 ORDER BY sold_count DESC, p.id DESC LIMIT $1`,
+    `${PRODUCT_SELECT} WHERE u.is_active = true AND p.stock > 0 ORDER BY sold_count DESC, avg_rating DESC, p.id DESC LIMIT $1`,
     [limit]
   );
   return rows;

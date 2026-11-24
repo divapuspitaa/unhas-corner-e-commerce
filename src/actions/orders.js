@@ -19,7 +19,7 @@ export async function cancelOrder(formData) {
   await withTransaction(async (client) => {
     const { rows } = await client.query("SELECT status FROM orders WHERE id = $1 AND buyer_id = $2 FOR UPDATE", [orderId, user.id]);
     if (!rows[0] || rows[0].status !== "menunggu_pembayaran") {
-      msg = "Pesanan hanya bisa dibatalkan saat menunggu pembayaran.";
+      msg = "Pesanan hanya bisa dibatalkan saat menunggu verifikasi.";
       return;
     }
     await changeOrderStatus(client, orderId, "dibatalkan", user.id, "Dibatalkan oleh pembeli");

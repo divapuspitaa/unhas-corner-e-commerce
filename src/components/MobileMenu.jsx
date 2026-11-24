@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LuMenu, LuX } from "react-icons/lu";
@@ -19,9 +20,10 @@ export default function MobileMenu({ links, loggedIn }) {
       >
         <LuMenu size={22} />
       </button>
-      {open && (
-        <div className="fixed inset-0 z-60 flex flex-col bg-white">
-          <div className="flex items-center justify-between border-b border-line px-4 py-3">
+      {open &&
+        createPortal(
+        <div className="fixed inset-0 z-60 flex flex-col bg-white/60 backdrop-blur-2xl">
+          <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
             <span className="font-heading text-lg font-bold text-primary">UnhasCorner</span>
             <button
               onClick={() => setOpen(false)}
@@ -47,7 +49,7 @@ export default function MobileMenu({ links, loggedIn }) {
                   className={`flex items-center justify-between rounded-lg px-3 py-3 text-base transition-colors ${
                     isActive
                       ? "bg-primary-soft font-semibold text-primary"
-                      : "font-medium hover:bg-primary-soft hover:text-primary"
+                      : "font-medium hover:bg-white/60 hover:text-primary"
                   }`}
                 >
                   <span>{l.label}</span>
@@ -63,7 +65,8 @@ export default function MobileMenu({ links, loggedIn }) {
               </form>
             )}
           </nav>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

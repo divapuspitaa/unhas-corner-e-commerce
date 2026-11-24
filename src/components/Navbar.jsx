@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { LuShoppingCart, LuLogOut } from "react-icons/lu";
+import { LuCircleCheck } from "react-icons/lu";
 import MobileMenu from "@/components/MobileMenu";
 import {
   CategoryDropdown,
@@ -15,6 +16,47 @@ import { logout } from "@/actions/auth";
 export default async function Navbar() {
   const [user, categories] = await Promise.all([getCurrentUser(), getCategories()]);
   const cartCount = user?.role === "buyer" ? await getCartCount(user.id) : 0;
+
+  // Admin & seller tidak memakai navbar katalog: tampilkan keterangan sambutan + tombol keluar
+  if (user?.role === "admin" || user?.role === "seller") {
+    const isAdmin = user.role === "admin";
+    const home = isAdmin
+      ? "/admin/dashboard"
+      : user.seller_status === "approved"
+        ? "/seller/dashboard"
+        : "/seller/pending";
+    return (
+      <header className="sticky top-0 z-40 border-b border-black/5 bg-white/75 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-1480px items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+          <Link href={home} className="shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo.svg" alt="UnhasCorner" className="h-9 w-auto" />
+          </Link>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-ink">
+              Selamat datang, {user.name}!
+            </p>
+            <p className="flex items-center gap-1.5 truncate text-xs text-muted">
+              <LuCircleCheck size={13} className="shrink-0 text-emerald-600" />
+              <span className="truncate">
+                Sedang dibuka: <strong className="text-primary">Dashboard {isAdmin ? "Admin" : "Seller"}</strong> · Aktif
+              </span>
+            </p>
+          </div>
+          <form action={logout}>
+            <button
+              aria-label="Keluar"
+              title="Keluar"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-status-danger-bg hover:text-status-danger-text"
+            >
+              <LuLogOut size={18} />
+              <span className="hidden sm:inline">Keluar</span>
+            </button>
+          </form>
+        </div>
+      </header>
+    );
+  }
 
   const links = [
     { href: "/", label: "Beranda" },

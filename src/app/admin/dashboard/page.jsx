@@ -13,7 +13,7 @@ import {
 } from "react-icons/lu";
 import { query } from "@/lib/db";
 
-export const metadata = { title: "Panel Admin" };
+export const metadata = { title: "Dashboard Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminHome() {
@@ -26,7 +26,7 @@ export default async function AdminHome() {
   const [{ rows }, { rows: pendingList }, { rows: reactivationList }] = await Promise.all([
     query(`
       SELECT
-        (SELECT COUNT(*) FROM users WHERE role = 'buyer')::int AS buyers,
+        (SELECT COUNT(*) FROM users WHERE role = 'buyer' AND is_active IS NOT FALSE)::int AS buyers,
         (SELECT COUNT(*) FROM users WHERE role = 'seller' AND seller_status = 'approved')::int AS sellers,
         (SELECT COUNT(*) FROM users WHERE role = 'seller' AND seller_status = 'pending')::int AS pending,
         (SELECT COUNT(*) FROM products)::int AS products,
@@ -48,7 +48,7 @@ export default async function AdminHome() {
 
   const s = rows[0];
   const stats = [
-    { label: "Mahasiswa (Buyer)", value: s.buyers, href: "/admin/users", icon: LuUsers },
+    { label: "Pembeli Aktif", value: s.buyers, href: "/admin/users", icon: LuUsers },
     { label: "Toko Aktif", value: s.sellers, href: "/admin/users", icon: LuStore },
     { label: "Menunggu Verifikasi", value: s.pending, href: "/admin/verifikasi", icon: LuClock },
     { label: "Total Produk", value: s.products, href: "/admin/produk", icon: LuPackage },
@@ -57,14 +57,14 @@ export default async function AdminHome() {
 
   return (
     <div className="space-y-5">
-      <div className="card flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-primary-soft/60 via-white to-white p-5">
+      <div className="card flex flex-wrap items-center justify-between gap-4 border-primary bg-primary p-5">
         <div>
-          <h2 className="text-lg font-bold text-ink">Pusat Kendali UnhasCorner</h2>
-          <p className="mt-0.5 text-sm text-muted">
+          <h2 className="text-lg font-bold text-white">Pusat Kendali UnhasCorner</h2>
+          <p className="mt-0.5 text-sm text-white/85">
             Kelola verifikasi toko resmi kampus, aktivasi akun pengguna, kategori, dan moderasi katalog.
           </p>
         </div>
-        <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 rounded-2xl bg-white p-2.5">
           <Link href="/admin/verifikasi" className="btn btn-primary btn-sm rounded-full">
             <LuShieldCheck size={15} /> Verifikasi Seller {s.pending > 0 ? `(${s.pending})` : ""}
           </Link>

@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LuArrowLeft, LuTrash2, LuStore, LuShoppingBag } from "react-icons/lu";
+import { LuArrowLeft, LuTrash2, LuStore, LuShoppingBag, LuMinus, LuPlus, LuCreditCard } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
 import SubmitButton from "@/components/SubmitButton";
 import ConfirmButton from "@/components/ConfirmButton";
 import { getCurrentUser } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { formatRupiah } from "@/lib/format";
-import { checkout, removeCartItem, updateCartQty } from "@/actions/cart";
+import { removeCartItem, updateCartQty } from "@/actions/cart";
 
 export const metadata = { title: "Keranjang Belanja" };
 export const dynamic = "force-dynamic";
@@ -18,8 +18,7 @@ export default async function CartPage({ searchParams }) {
   if (!user) redirect("/login?next=/keranjang");
   if (user.role !== "buyer") redirect("/");
 
-  const [{ rows: items }, { rows: addresses }] = await Promise.all([
-    query(
+  const { rows: items } = await query(
       `SELECT ci.id, ci.quantity, p.id AS product_id, p.name, p.price, p.stock, p.image_url,
               s.name AS store_name, u.is_active AS store_active
        FROM cart_items ci
@@ -27,10 +26,8 @@ export default async function CartPage({ searchParams }) {
        JOIN stores s ON s.id = p.store_id
        JOIN users u ON u.id = s.user_id
        WHERE ci.user_id = $1 ORDER BY s.name, ci.id`,
-      [user.id]
-    ),
-    query("SELECT * FROM addresses WHERE user_id = $1 ORDER BY is_default DESC, id", [user.id]),
-  ]);
+    [user.id]
+  );
 
   const total = items.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
@@ -101,21 +98,35 @@ export default async function CartPage({ searchParams }) {
                               Toko sedang dinonaktifkan sementara, hapus item ini
                             </span>
                           ) : i.stock > 0 ? (
-                            <form action={updateCartQty} className="flex items-center gap-2">
-                              <input type="hidden" name="cartItemId" value={i.id} />
-                              <input
-                                type="number"
-                                name="quantity"
-                                min="1"
-                                max={i.stock}
-                                defaultValue={Math.min(i.quantity, i.stock)}
-                                aria-label="Jumlah item"
-                                className="input w-20! py-1!"
-                              />
-                              <SubmitButton className="btn btn-outline btn-sm" pendingText="...">
-                                Ubah
-                              </SubmitButton>
-                            </form>
+                            <div className="inline-flex items-center overflow-hidden rounded-full border border-line bg-white">
+                              <form action={updateCartQty}>
+                                <input type="hidden" name="cartItemId" value={i.id} />
+                                <input type="hidden" name="quantity" value={Math.min(i.quantity, i.stock) - 1} />
+                                <SubmitButton
+                                  disabled={Math.min(i.quantity, i.stock) <= 1}
+                                  className="flex h-8 w-8 items-center justify-center transition-colors hover:bg-primary-soft hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                                  pendingText="…"
+                                  aria-label="Kurangi jumlah"
+                                >
+                                  <LuMinus size={15} />
+                                </SubmitButton>
+                              </form>
+                              <span className="min-w-8 text-center text-sm font-semibold tabular-nums">
+                                {Math.min(i.quantity, i.stock)}
+                              </span>
+                              <form action={updateCartQty}>
+                                <input type="hidden" name="cartItemId" value={i.id} />
+                                <input type="hidden" name="quantity" value={Math.min(i.quantity, i.stock) + 1} />
+                                <SubmitButton
+                                  disabled={Math.min(i.quantity, i.stock) >= i.stock}
+                                  className="flex h-8 w-8 items-center justify-center transition-colors hover:bg-primary-soft hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                                  pendingText="…"
+                                  aria-label="Tambah jumlah"
+                                >
+                                  <LuPlus size={15} />
+                                </SubmitButton>
+                              </form>
+                            </div>
                           ) : (
                             <span className="text-xs font-semibold text-status-danger-text">
                               Stok habis, hapus item ini
@@ -131,6 +142,15 @@ export default async function CartPage({ searchParams }) {
                               <LuTrash2 size={14} />
                             </ConfirmButton>
                           </form>
+                          {i.store_active !== false && i.stock > 0 && (
+                            <Link
+                              href={`/checkout?items=${i.id}`}
+                              className="btn btn-primary btn-sm"
+                              title="Checkout hanya produk ini"
+                            >
+                              <LuCreditCard size={14} /> Checkout
+                            </Link>
+                          )}
                           <span className="ml-auto text-xs text-muted">Sisa stok: {i.stock}</span>
                         </div>
                       </div>
@@ -140,10 +160,7 @@ export default async function CartPage({ searchParams }) {
             ))}
           </div>
 
-          <form
-            action={checkout}
-            className="h-fit space-y-4 rounded-2xl border border-line bg-white p-5 shadow-xs lg:sticky lg:top-20"
-          >
+          <div className="h-fit space-y-4 rounded-2xl border border-line bg-white p-5 shadow-xs lg:sticky lg:top-20">
             <h2 className="border-b border-line/70 pb-3 text-base font-bold text-ink">
               Ringkasan Belanja
             </h2>
@@ -154,46 +171,24 @@ export default async function CartPage({ searchParams }) {
             <p className="rounded-lg bg-surface/60 px-3 py-2 text-xs text-muted">
               Pesanan dipecah otomatis menjadi <strong>{storeNames.length} order</strong> (satu per toko).
             </p>
-
-            <div>
-              <label className="label" htmlFor="addressId">Alamat pengiriman</label>
-              {addresses.length === 0 ? (
-                <p className="text-sm text-status-danger-text">
-                  Belum ada alamat tersimpan.{" "}
-                  <Link href="/buyer/alamat" className="font-semibold underline">
-                    Tambah alamat sekarang
-                  </Link>
+            <p className="text-xs text-muted">
+              Checkout semua belanjaan sekaligus, atau pilih tombol <strong>Checkout</strong> di tiap produk untuk membeli satu per satu.
+            </p>
+            {hasStockIssue ? (
+              <>
+                <button type="button" disabled className="btn btn-primary w-full">
+                  Checkout Semua ({totalQty})
+                </button>
+                <p className="text-xs text-status-danger-text">
+                  Hapus produk yang stoknya habis / tokonya nonaktif untuk checkout semua, atau checkout produk lain satu per satu.
                 </p>
-              ) : (
-                <select id="addressId" name="addressId" required className="input" defaultValue={addresses[0].id}>
-                  {addresses.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.label} — {a.recipient_name}, {a.full_address.slice(0, 40)}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            <div>
-              <label className="label" htmlFor="note">Catatan untuk penjual (opsional)</label>
-              <textarea
-                id="note"
-                name="note"
-                rows={2}
-                placeholder="Contoh: Titip di pos satpam / ukuran L / ambil saat jam istirahat"
-                className="input"
-              />
-            </div>
-
-            <SubmitButton
-              disabled={addresses.length === 0 || hasStockIssue}
-              className="btn btn-primary w-full"
-              pendingText="Memproses..."
-            >
-              Checkout ({totalQty})
-            </SubmitButton>
-          </form>
+              </>
+            ) : (
+              <Link href="/checkout" className="btn btn-primary w-full">
+                <LuCreditCard size={16} /> Checkout Semua ({totalQty})
+              </Link>
+            )}
+          </div>
         </div>
       )}
     </div>

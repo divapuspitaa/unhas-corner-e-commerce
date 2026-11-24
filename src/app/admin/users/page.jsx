@@ -68,8 +68,8 @@ export default async function AdminUsersPage({ searchParams }) {
 
   return (
     <div className="space-y-4">
-      <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-3">
-        <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap gap-1.5">
+      <div className="card flex flex-wrap items-center justify-between gap-3 p-3">
+        <div className="flex flex-wrap gap-1.5">
           {TABS.map(([key, label]) => {
             const active = statusFilter === key;
             const href = new URLSearchParams();
@@ -100,7 +100,7 @@ export default async function AdminUsersPage({ searchParams }) {
           })}
         </div>
 
-        <form className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-3 shadow-sm backdrop-blur-mdflex gap-2">
+        <form className="flex gap-2">
           {statusFilter !== "semua" && <input type="hidden" name="status" value={statusFilter} />}
           <input
             name="q"
@@ -161,7 +161,7 @@ export default async function AdminUsersPage({ searchParams }) {
                     </td>
 
                     <td className="p-3.5">
-                      <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <span className="inline-block rounded-full bg-line px-2.5 py-0.5 text-xs font-medium capitalize">
                           {u.role}
                         </span>

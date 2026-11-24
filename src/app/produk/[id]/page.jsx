@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LuArrowLeft, LuChevronRight, LuMessageSquare, LuShieldAlert } from "react-icons/lu";
+import { LuArrowLeft, LuChevronRight, LuMessageSquare, LuShieldAlert, LuShoppingCart, LuCreditCard } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
 import SubmitButton from "@/components/SubmitButton";
 import WishlistDetailButton from "@/components/WishlistDetailButton";
 import Stars from "@/components/Stars";
+import QuantityStepper from "@/components/QuantityStepper";
 import { Tag } from "@/components/Badge";
 import { getCurrentUser } from "@/lib/auth";
 import { getProduct, getReviews, getWishlistIds } from "@/lib/queries";
@@ -137,16 +138,7 @@ export default async function ProductDetailPage({ params }) {
               <input type="hidden" name="returnTo" value={path} />
               <p className="text-sm font-bold text-ink">Atur Jumlah Pembelian</p>
               <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  name="quantity"
-                  min="1"
-                  max={Math.max(product.stock, 1)}
-                  defaultValue="1"
-                  className="input w-24"
-                  aria-label="Jumlah"
-                  suppressHydrationWarning
-                />
+                <QuantityStepper max={product.stock} />
                 <span className="text-xs font-medium text-muted">
                   {product.stock > 0 ? `Stok tersedia: ${product.stock}` : "Stok habis"}
                 </span>
@@ -158,7 +150,7 @@ export default async function ProductDetailPage({ params }) {
                 className="btn btn-primary w-full"
                 pendingText="Memproses..."
               >
-                Beli Langsung
+                <LuCreditCard size={16} /> Beli Langsung
               </SubmitButton>
               <SubmitButton
                 name="mode"
@@ -167,7 +159,7 @@ export default async function ProductDetailPage({ params }) {
                 className="btn btn-outline w-full"
                 pendingText="Memproses..."
               >
-                + Keranjang
+                <LuShoppingCart size={16} /> Tambah ke Keranjang
               </SubmitButton>
             </form>
           ) : (

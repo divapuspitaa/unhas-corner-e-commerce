@@ -3,9 +3,10 @@ import ConfirmButton from "@/components/ConfirmButton";
 import ReviewForm from "@/components/ReviewForm";
 import SafeImage from "@/components/SafeImage";
 import { StatusBadge } from "@/components/Badge";
+import OrderTabs, { filterOrders } from "@/components/OrderTabs";
 import { requireUser } from "@/lib/auth";
 import { query } from "@/lib/db";
-import { formatDate, formatRupiah } from "@/lib/format";
+import { ACTIVE_ORDER_STATUSES, formatDate, formatRupiah } from "@/lib/format";
 import { cancelOrder, confirmReceived } from "@/actions/orders";
 
 export const metadata = { title: "Riwayat Pesanan" };
@@ -15,11 +16,19 @@ export default async function BuyerOrdersPage({ searchParams }) {
   const sp = await searchParams;
   const user = await requireUser("buyer");
 
-  const { rows: orders } = await query(
+  const { rows: allOrders } = await query(
     `SELECT o.*, s.name AS store_name FROM orders o JOIN stores s ON s.id = o.store_id
      WHERE o.buyer_id = $1 ORDER BY o.created_at DESC, o.id DESC`,
     [user.id]
   );
+  const tab = ["berjalan", "selesai", "dibatalkan"].includes(sp.tab) ? sp.tab : "semua";
+  const counts = {
+    semua: allOrders.length,
+    berjalan: filterOrders(allOrders, "berjalan", ACTIVE_ORDER_STATUSES).length,
+    selesai: filterOrders(allOrders, "selesai", ACTIVE_ORDER_STATUSES).length,
+    dibatalkan: filterOrders(allOrders, "dibatalkan", ACTIVE_ORDER_STATUSES).length,
+  };
+  const orders = filterOrders(allOrders, tab, ACTIVE_ORDER_STATUSES);
   const ids = orders.map((o) => o.id);
   const [items, logs, reviews] = ids.length
     ? await Promise.all([
@@ -32,15 +41,19 @@ export default async function BuyerOrdersPage({ searchParams }) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Riwayat Pesanan</h2>
-      {orders.length === 0 && (
+      <OrderTabs basePath="/buyer/pesanan" tab={tab} counts={counts} />
+      {orders.length === 0 && allOrders.length === 0 && (
         <div className="card p-8 text-center text-muted">
           Belum ada pesanan. <Link href="/produk" className="font-semibold text-primary">Belanja sekarang</Link>
         </div>
       )}
+      {orders.length === 0 && allOrders.length > 0 && (
+        <div className="card p-8 text-center text-muted">Tidak ada pesanan pada kategori ini.</div>
+      )}
 
       {orders.map((o) => (
         <div key={o.id} className="card overflow-hidden">
-          <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface px-4 py-3">
             <div>
               <p className="text-sm font-semibold">{o.order_code}</p>
               <p className="text-xs text-muted">{o.store_name} · {formatDate(o.created_at)}</p>
@@ -88,7 +101,7 @@ export default async function BuyerOrdersPage({ searchParams }) {
               </ol>
             </details>
 
-            <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-bold text-primary">Total: {formatRupiah(o.total_price)}</p>
               <div className="flex gap-2">
                 {o.status === "menunggu_pembayaran" && (

@@ -4,19 +4,27 @@ import ConfirmButton from "@/components/ConfirmButton";
 import SafeImage from "@/components/SafeImage";
 import { requireApprovedSeller } from "@/lib/auth";
 import { query } from "@/lib/db";
-import { formatRupiah } from "@/lib/format";
+import { LOW_STOCK_LIMIT, formatRupiah } from "@/lib/format";
 import { deleteProduct } from "@/actions/products";
 
 export const metadata = { title: "Produk Saya" };
 export const dynamic = "force-dynamic";
 
+const SORT_OPTIONS = [
+  ["stok", "Stok Tersedikit", "p.stock ASC, p.price DESC, p.id DESC"],
+  ["stok_terbanyak", "Stok Terbanyak", "p.stock DESC, p.price DESC, p.id DESC"],
+  ["harga_termurah", "Harga Termurah", "p.price ASC, p.stock ASC, p.id DESC"],
+  ["harga_termahal", "Harga Termahal", "p.price DESC, p.stock ASC, p.id DESC"],
+];
+
 export default async function SellerProductsPage({ searchParams }) {
   const sp = await searchParams;
   const user = await requireApprovedSeller();
+  const currentSort = SORT_OPTIONS.find(([k]) => k === sp.sort) ?? SORT_OPTIONS[0];
   const { rows } = await query(
     `SELECT p.*, c.name AS category_name FROM products p
      JOIN stores s ON s.id = p.store_id LEFT JOIN categories c ON c.id = p.category_id
-     WHERE s.user_id = $1 ORDER BY p.id DESC`,
+     WHERE s.user_id = $1 ORDER BY ${currentSort[2]}`,
     [user.id]
   );
 
@@ -27,8 +35,25 @@ export default async function SellerProductsPage({ searchParams }) {
         <Link href="/seller/produk/baru" className="btn btn-primary"><LuPlus size={16} /> Tambah Produk</Link>
       </div>
 
+      <div className="mb-3 flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-xs font-semibold text-muted">Urutkan (stok &amp; harga):</span>
+        {SORT_OPTIONS.map(([key, label]) => (
+          <Link
+            key={key}
+            href={key === SORT_OPTIONS[0][0] ? "/seller/produk" : `/seller/produk?sort=${key}`}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+              currentSort[0] === key
+                ? "bg-primary font-semibold text-white shadow-xs"
+                : "border border-line bg-white text-ink hover:border-primary hover:bg-primary-soft hover:text-primary"
+            }`}
+          >
+            {label}
+          </Link>
+        ))}
+      </div>
+
       <div className="card overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left text-sm">
+        <table className="w-full min-w-160 text-left text-sm">
           <thead className="border-b border-line bg-surface text-xs text-muted">
             <tr>
               <th className="p-3">Produk</th>
@@ -52,7 +77,18 @@ export default async function SellerProductsPage({ searchParams }) {
                 </td>
                 <td className="p-3 text-muted">{p.category_name ?? "-"}</td>
                 <td className="p-3">{formatRupiah(p.price)}</td>
-                <td className="p-3">{p.stock}</td>
+                <td className="p-3">
+                  {p.stock <= LOW_STOCK_LIMIT ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="font-bold text-yellow-500">{p.stock}</span>
+                      <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-[11px] font-bold text-yellow-600">
+                        {p.stock === 0 ? "Habis" : "Stok menipis"}
+                      </span>
+                    </span>
+                  ) : (
+                    p.stock
+                  )}
+                </td>
                 <td className="p-3">
                   <div className="flex justify-end gap-2">
                     <Link href={`/seller/produk/${p.id}/edit`} className="btn btn-outline btn-sm"><LuPencil size={13} /> Edit</Link>

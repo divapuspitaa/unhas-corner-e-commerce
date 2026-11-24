@@ -16,8 +16,14 @@ export function formatDate(d) {
   }).format(new Date(d));
 }
 
+// Batas stok: produk dengan stok <= nilai ini dianggap menipis
+export const LOW_STOCK_LIMIT = 5;
+
+// Status pesanan yang masih berjalan (selesai & dibatalkan TIDAK termasuk)
+export const ACTIVE_ORDER_STATUSES = ["menunggu_pembayaran", "diproses", "dikirim"];
+
 export const ORDER_STATUS = {
-  menunggu_pembayaran: { label: "Menunggu Pembayaran", cls: "bg-status-pending-bg text-status-pending-text" },
+  menunggu_pembayaran: { label: "Menunggu Verifikasi", cls: "bg-status-pending-bg text-status-pending-text" },
   diproses: { label: "Diproses", cls: "bg-status-processing-bg text-status-processing-text" },
   dikirim: { label: "Dikirim", cls: "bg-status-shipping-bg text-status-shipping-text" },
   selesai: { label: "Selesai", cls: "bg-status-success-bg text-status-success-text" },

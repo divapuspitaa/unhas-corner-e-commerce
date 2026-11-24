@@ -7,7 +7,7 @@ export default async function BuyerLayout({ children }) {
     <DashboardShell
       title="Dashboard Mahasiswa"
       links={[
-        { href: "/buyer/dashboard", label: "Ringkasan" },
+        { href: "/buyer/dashboard", label: "Dashboard" },
         { href: "/buyer/pesanan", label: "Riwayat Pesanan" },
         { href: "/buyer/wishlist", label: "Wishlist" },
         { href: "/buyer/alamat", label: "Alamat Pengiriman" },

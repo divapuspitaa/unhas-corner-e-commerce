@@ -11,7 +11,7 @@ import {
 import { StatusBadge } from "@/components/Badge";
 import { requireUser } from "@/lib/auth";
 import { query } from "@/lib/db";
-import { formatDate, formatRupiah } from "@/lib/format";
+import { ACTIVE_ORDER_STATUSES, formatDate, formatRupiah } from "@/lib/format";
 
 export const metadata = { title: "Dashboard Mahasiswa" };
 export const dynamic = "force-dynamic";
@@ -24,8 +24,8 @@ export default async function BuyerDashboard() {
         (SELECT COALESCE(SUM(quantity),0)::int FROM cart_items WHERE user_id = $1) AS cart,
         (SELECT COUNT(*)::int FROM wishlists WHERE user_id = $1) AS wishlist,
         (SELECT COUNT(*)::int FROM orders WHERE buyer_id = $1) AS orders,
-        (SELECT COUNT(*)::int FROM orders WHERE buyer_id = $1 AND status IN ('menunggu_pembayaran','diproses','dikirim')) AS active`,
-      [user.id]
+        (SELECT COUNT(*)::int FROM orders WHERE buyer_id = $1 AND status = ANY($2::text[])) AS active`,
+      [user.id, ACTIVE_ORDER_STATUSES]
     ),
     query(
       `SELECT o.id, o.order_code, o.status, o.total_price, o.created_at FROM orders o
@@ -37,7 +37,7 @@ export default async function BuyerDashboard() {
   const s = c[0];
   const stats = [
     { label: "Item di Keranjang", value: s.cart, href: "/keranjang", icon: LuShoppingCart },
-    { label: "Pesanan Berjalan", value: s.active, href: "/buyer/pesanan", icon: LuClock },
+    { label: "Pesanan Berjalan", value: s.active, href: "/buyer/pesanan?tab=berjalan", icon: LuClock },
     { label: "Total Pesanan", value: s.orders, href: "/buyer/pesanan", icon: LuPackageCheck },
     { label: "Produk Wishlist", value: s.wishlist, href: "/buyer/wishlist", icon: LuHeart },
   ];
@@ -45,14 +45,14 @@ export default async function BuyerDashboard() {
   return (
     <div className="space-y-5">
       {/* Banner Sambutan & Pintasan Cepat */}
-      <div className="card flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-primary-soft/60 via-white to-white p-5">
+      <div className="card flex flex-wrap items-center justify-between gap-4 border-primary bg-primary p-5">
         <div>
-          <h2 className="text-lg font-bold text-ink">Halo, {user.name}!</h2>
-          <p className="mt-0.5 text-sm text-muted">
+          <h2 className="text-lg font-bold text-white">Halo, {user.name}!</h2>
+          <p className="mt-0.5 text-sm text-white/85">
             Pantau keranjang, status pengiriman, dan kebutuhan kuliahmu di UnhasCorner.
           </p>
         </div>
-        <div className="sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md sticky top-20 z-30 rounded-2xl border border-black/10 bg-white/95 p-2.5 shadow-sm backdrop-blur-md flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 rounded-2xl bg-white p-2.5">
           <Link href="/produk" className="btn btn-primary btn-sm rounded-full">
             <LuShoppingBag size={14} /> Belanja Sekarang
           </Link>

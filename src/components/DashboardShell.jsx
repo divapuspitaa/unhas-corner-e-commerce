@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LuArrowLeft, LuChevronRight } from "react-icons/lu";
 
-export default function DashboardShell({ title, links, children }) {
+export default function DashboardShell({ title, links, children, showHomeLink = true }) {
   const pathname = usePathname();
 
   const activeLink = links.find(
@@ -32,12 +32,14 @@ export default function DashboardShell({ title, links, children }) {
           </h1>
         </div>
 
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-semibold text-ink transition hover:border-primary hover:bg-primary-soft hover:text-primary"
-        >
-          <LuArrowLeft size={14} /> Kembali ke Beranda
-        </Link>
+        {showHomeLink && (
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-semibold text-ink transition hover:border-primary hover:bg-primary-soft hover:text-primary"
+          >
+            <LuArrowLeft size={14} /> Kembali ke Beranda
+          </Link>
+        )}
       </div>
 
       {/* Grid Sidebar & Konten Utama */}

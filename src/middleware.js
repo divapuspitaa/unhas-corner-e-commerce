@@ -18,6 +18,15 @@ export async function middleware(request) {
     }
   }
 
+  // Halaman katalog publik: admin & seller tidak punya akses, langsung ke dashboard
+  const isCatalog =
+    pathname === "/" || pathname.startsWith("/produk") || pathname.startsWith("/toko");
+  if (isCatalog) {
+    if (role === "admin") return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    if (role === "seller") return NextResponse.redirect(new URL("/seller/dashboard", request.url));
+    return NextResponse.next();
+  }
+
   // Belum login -> arahkan ke halaman login
   if (!role) {
     const url = new URL("/login", request.url);
@@ -29,7 +38,7 @@ export async function middleware(request) {
   let needed = null;
   if (pathname.startsWith("/admin")) needed = "admin";
   else if (pathname.startsWith("/seller")) needed = "seller";
-  else if (pathname.startsWith("/buyer") || pathname === "/keranjang") needed = "buyer";
+  else if (pathname.startsWith("/buyer") || pathname === "/keranjang" || pathname === "/checkout") needed = "buyer";
 
   // Sudah login tetapi salah role -> tampilkan halaman 403 Forbidden
   if (needed && role !== needed) {
@@ -40,5 +49,15 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/dashboard", "/keranjang", "/admin/:path*", "/seller/:path*", "/buyer/:path*"],
+  matcher: [
+    "/",
+    "/produk/:path*",
+    "/toko/:path*",
+    "/dashboard",
+    "/keranjang",
+    "/checkout",
+    "/admin/:path*",
+    "/seller/:path*",
+    "/buyer/:path*",
+  ],
 };

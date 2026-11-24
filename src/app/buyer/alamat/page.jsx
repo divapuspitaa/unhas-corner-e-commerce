@@ -21,7 +21,7 @@ export default async function AddressPage({ searchParams }) {
           <div key={a.id} className="card p-4 text-sm">
             <p className="flex items-center gap-2 font-semibold">
               {a.label}
-              {a.is_default && <span className="rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-bold text-accent">UTAMA</span>}
+              {a.is_default && <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-extrabold text-primary-dark">UTAMA</span>}
             </p>
             <p>{a.recipient_name} · {a.phone}</p>
             <p className="text-muted">{a.full_address}, {a.city} {a.postal_code}</p>

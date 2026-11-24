@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
-  LuArrowLeft,
   LuShoppingCart,
   LuHeart,
   LuLayoutDashboard,
@@ -167,7 +166,6 @@ export function CategoryDropdown({ categories }) {
 export function DesktopNavLinks({ user, cartCount, dashboardHref }) {
   const pathname = usePathname();
 
-  const isHome = pathname === "/";
   const isWishlist = pathname === "/buyer/wishlist" || pathname.startsWith("/buyer/wishlist/");
   const isCart = pathname === "/keranjang" || pathname === "/checkout";
   const isBuyerArea = pathname.startsWith("/buyer") && !isWishlist;
@@ -183,17 +181,6 @@ export function DesktopNavLinks({ user, cartCount, dashboardHref }) {
 
   return (
     <>
-      {!isHome && (
-        <Link
-          href="/"
-          title="Kembali ke Beranda"
-          className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-ink transition-all duration-200 hover:bg-primary-soft hover:text-primary"
-        >
-          <LuArrowLeft size={16} />
-          <span>Beranda</span>
-        </Link>
-      )}
-
       {user?.role === "buyer" && (
         <Link
           href="/buyer/wishlist"

@@ -65,7 +65,7 @@ export default async function ProductListPage({ searchParams }) {
 
   const activeCategoryObj = categories.find((c) => String(c.id) === String(sp.category));
   const activeStoreObj = stores.find((s) => String(s.id) === String(sp.store));
-  const hasActiveFilter = Boolean(sp.q || sp.category || sp.store || sp.min || sp.max);
+  const hasActiveFilter = Boolean(sp.q || sp.category || sp.store || sp.min || sp.max || sp.sort);
 
   return (
     <div className="mx-auto max-w-1480px px-4 py-6 sm:px-6 lg:px-8">
@@ -100,7 +100,7 @@ export default async function ProductListPage({ searchParams }) {
           method="GET"
           className="h-fit space-y-4 rounded-2xl border border-line bg-white p-4 shadow-xs lg:sticky lg:top-20"
         >
-          {sp.sort && <input type="hidden" name="sort" value={sp.sort} />}
+          {sp.q && <input type="hidden" name="q" value={sp.q} />}
 
           <div className="flex items-center justify-between border-b border-line/70 pb-2.5">
             <p className="flex items-center gap-2 text-sm font-bold text-ink">
@@ -108,7 +108,7 @@ export default async function ProductListPage({ searchParams }) {
             </p>
             {hasActiveFilter && (
               <Link
-                href={sp.sort ? `/produk?sort=${sp.sort}` : "/produk"}
+                href="/produk"
                 className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
               >
                 <LuRotateCcw size={12} /> Reset
@@ -117,14 +117,12 @@ export default async function ProductListPage({ searchParams }) {
           </div>
 
           <div>
-            <label className="label" htmlFor="q">Nama produk</label>
-            <input
-              id="q"
-              name="q"
-              defaultValue={sp.q ?? ""}
-              className="input"
-              placeholder="Contoh: Jas almamater, pulpen"
-            />
+            <label className="label" htmlFor="sort">Urutkan berdasarkan</label>
+            <select id="sort" name="sort" defaultValue={currentSort} className="input">
+              {SORT_OPTIONS.map(([v, label]) => (
+                <option key={v} value={v}>{label}</option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -183,32 +181,6 @@ export default async function ProductListPage({ searchParams }) {
 
         {/* Area Katalog Utama */}
         <div className="min-w-0 space-y-4">
-          {/* Bar Urutan */}
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-line bg-white px-4 py-2.5 text-sm shadow-xs">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-xs font-semibold text-muted">Urutkan:</span>
-              {SORT_OPTIONS.map(([v, label]) => (
-                <Link
-                  key={v}
-                  href={buildHref({ sort: v, page: undefined })}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
-                    currentSort === v
-                      ? "bg-primary font-semibold text-white shadow-xs"
-                      : "border border-line bg-surface/50 text-ink hover:border-primary hover:bg-primary-soft hover:text-primary"
-                  }`}
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-
-            {totalPages > 1 && (
-              <span className="text-xs text-muted">
-                Hal. <strong className="text-ink">{page}</strong> / {totalPages}
-              </span>
-            )}
-          </div>
-
           {/* Grid Produk Rapat */}
           {products.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-line bg-white px-6 py-14 text-center">
