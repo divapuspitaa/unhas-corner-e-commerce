@@ -147,7 +147,7 @@ unhas-corner/
 1. **Pembeli (Buyer)**:
    - Daftar akun di `/register` (pilih **Pembeli**) atau masuk di `/login`.
    - Jelajahi katalog di `/` atau `/produk`, simpan produk ke **Wishlist** (`/wishlist`), atau tambahkan ke **Keranjang** (`/keranjang`).
-   - Lakukan checkout, pantau status pesanan secara real-time di `/buyer/pesanan`, klik **Pesanan Diterima (Selesai)** saat barang tiba, dan berikan ulasan produk.
+   - Lakukan checkout, `/checkout` (tersedia pilihan **checkout langsung** dari produk, **checkout item satu per satu**, maupun **checkout semua belanjaan sekaligus** dari keranjang), pantau status pesanan secara *real-time* di `/buyer/pesanan`, klik **Pesanan Diterima (Selesai)** saat barang tiba, dan berikan ulasan produk.
 2. **Pengelola Toko (Seller)**:
    - Daftar di `/register` (pilih **Toko**) menggunakan email `@unhascorner.id` melalui 3 langkah (*Data Diri → Info Toko → Verifikasi NIK, KTP & Selfie*).
    - Tunggu persetujuan Admin. Jika disetujui, kelola toko & ganti password di `/seller/toko`, tambah produk di `/seller/produk`, dan proses pesanan di `/seller/pesanan`.
