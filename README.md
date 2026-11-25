@@ -48,13 +48,6 @@
 
 ---
 
-## Preview
-
-<!-- Add application screenshots here -->
-> Tambahkan screenshot tampilan Beranda, Detail Produk, Halaman Wishlist, Dashboard Seller, dan Panel Verifikasi Admin di sini.
-
----
-
 ## Tech Stack
 
 - **Frontend:** Next.js 16 (App Router, Server & Client Components), React 19, Tailwind CSS v4 (`@tailwindcss/postcss`), React Icons (`react-icons/lu`)
