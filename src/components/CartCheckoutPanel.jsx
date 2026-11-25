@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LuCreditCard } from "react-icons/lu";
+import { LuArrowRight, LuCreditCard } from "react-icons/lu";
+import FloatingOrderBar from "@/components/FloatingOrderBar";
 
 const rupiah = (n) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
@@ -80,23 +81,22 @@ export default function CartCheckoutPanel({ initialCount, initialTotal, storeCou
         </button>
       </div>
 
-      {/* Bar checkout menempel di bawah layar (khusus HP / tablet) */}
-      <div
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-white/95 shadow-[0_-6px_20px_rgba(0,0,0,0.08)] backdrop-blur-md lg:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      {/* Kartu ringkasan melayang di bawah layar (khusus HP / tablet) */}
+      <FloatingOrderBar
+        title="Ringkasan Belanja"
+        countText={`${sel.count} barang`}
+        subText={
+          sel.count === 0
+            ? "Centang produk yang ingin di-checkout"
+            : `${sel.stores} toko · ${sel.stores} order · dari ${selectableCount} produk`
+        }
+        total={rupiah(sel.total)}
+        caption="Total pembayaran"
       >
-        <div className="mx-auto flex max-w-1480px items-center justify-between gap-3 px-4 py-3">
-          <div className="min-w-0">
-            <p className="text-lg leading-tight font-bold text-ink">{rupiah(sel.total)}</p>
-            <p className="text-xs text-muted">
-              {sel.count} barang dipilih{selectableCount > 0 ? ` dari ${selectableCount} produk` : ""}
-            </p>
-          </div>
-          <button type="submit" disabled={disabled} className="btn btn-primary shrink-0 rounded-full px-5 py-2.5">
-            <LuCreditCard size={16} /> {disabled ? "Pilih produk" : "Checkout"}
-          </button>
-        </div>
-      </div>
+        <button type="submit" disabled={disabled} className="btn btn-primary shrink-0 rounded-xl px-5 py-3">
+          {disabled ? "Pilih produk" : "Checkout"} <LuArrowRight size={16} />
+        </button>
+      </FloatingOrderBar>
     </form>
   );
 }

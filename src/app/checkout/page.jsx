@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LuArrowLeft, LuStore, LuCreditCard } from "react-icons/lu";
+import { LuArrowLeft, LuStore } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
-import SubmitButton from "@/components/SubmitButton";
+import CheckoutForm from "@/components/CheckoutForm";
 import { getCurrentUser } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { formatRupiah } from "@/lib/format";
 import { checkout } from "@/actions/cart";
 
-export const metadata = { title: "Checkout" };
+export const metadata = { title: "Konfirmasi Pesanan" };
 export const dynamic = "force-dynamic";
 
 export default async function CheckoutPage({ searchParams }) {
@@ -47,12 +47,12 @@ export default async function CheckoutPage({ searchParams }) {
   const hasStockIssue = items.some((i) => i.store_active === false || i.stock <= 0 || i.quantity > i.stock);
 
   return (
-    <div className="mx-auto max-w-1480px px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-1480px px-4 py-6 pb-48 sm:px-6 lg:px-8 lg:pb-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line/70 pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-ink">Checkout</h1>
+          <h1 className="text-2xl font-bold text-ink">Konfirmasi Pesanan</h1>
           <p className="mt-0.5 text-sm text-muted">
-            {totalQty} item dari {storeNames.length} toko siap dipesan
+            Periksa kembali produk, jumlah, alamat pengiriman, dan total sebelum membuat pesanan.
           </p>
         </div>
         <Link
@@ -112,20 +112,22 @@ export default async function CheckoutPage({ searchParams }) {
           ))}
         </div>
 
-        <form
+        <CheckoutForm
           action={checkout}
-          className="h-fit space-y-4 rounded-2xl border border-line bg-white p-5 shadow-xs lg:sticky lg:top-20"
+          itemIds={itemIds ? itemIds.join(",") : null}
+          count={totalQty}
+          storeCount={storeNames.length}
+          total={total}
+          items={items.map((i) => ({ name: i.name, qty: i.quantity }))}
+          canSubmit={addresses.length > 0 && !hasStockIssue}
+          blockedReason={
+            hasStockIssue
+              ? "Ada produk yang stoknya tidak cukup atau tokonya nonaktif. Kembali ke keranjang untuk menyesuaikan."
+              : addresses.length === 0
+                ? "Tambahkan alamat pengiriman terlebih dahulu."
+                : ""
+          }
         >
-          {itemIds && <input type="hidden" name="itemIds" value={itemIds.join(",")} />}
-          <h2 className="border-b border-line/70 pb-3 text-base font-bold text-ink">Ringkasan Pesanan</h2>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted">Total harga ({totalQty} barang)</span>
-            <span className="text-xl font-bold text-primary">{formatRupiah(total)}</span>
-          </div>
-          <p className="rounded-lg bg-surface/60 px-3 py-2 text-xs text-muted">
-            Pesanan dipecah otomatis menjadi <strong>{storeNames.length} order</strong> (satu per toko).
-          </p>
-
           <div>
             <label className="label" htmlFor="addressId">Alamat pengiriman</label>
             {addresses.length === 0 ? (
@@ -144,6 +146,9 @@ export default async function CheckoutPage({ searchParams }) {
                 ))}
               </select>
             )}
+            <Link href="/buyer/alamat" className="mt-1.5 inline-block text-xs text-muted underline hover:text-primary">
+              Kelola alamat tersimpan
+            </Link>
           </div>
 
           <div>
@@ -156,15 +161,7 @@ export default async function CheckoutPage({ searchParams }) {
               className="input"
             />
           </div>
-
-          <SubmitButton
-            disabled={addresses.length === 0 || hasStockIssue}
-            className="btn btn-primary w-full"
-            pendingText="Memproses..."
-          >
-            <LuCreditCard size={16} /> Buat Pesanan ({totalQty})
-          </SubmitButton>
-        </form>
+        </CheckoutForm>
       </div>
     </div>
   );

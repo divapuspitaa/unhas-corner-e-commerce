@@ -41,7 +41,7 @@ export default async function CartPage({ searchParams }) {
   const selStoreCount = new Set(selectable.map((i) => i.store_name)).size;
 
   return (
-    <div className="mx-auto max-w-1480px px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:pb-6">
+    <div className="mx-auto max-w-1480px px-4 py-6 pb-48 sm:px-6 lg:px-8 lg:pb-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line/70 pb-4">
         <div>
           <h1 className="text-2xl font-bold text-ink">Keranjang Belanja</h1>
