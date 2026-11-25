@@ -21,7 +21,7 @@ export default async function HomePage() {
   const hasSales = bestSellers.length > 0;
 
   return (
-    <div className="mx-auto max-w-[1480px] space-y-8 px-4 pt-5 pb-2 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[1480px] space-y-8 px-4 pt-5 pb-4 sm:px-6 lg:px-8">
       {/* Hero Banner sejajar lurus dengan batas kiri-kanan Navbar */}
       <HeroBanner />
 
@@ -61,17 +61,9 @@ export default async function HomePage() {
 
       {/* Toko Resmi Kampus */}
       <section className="rounded-2xl border border-line/80 bg-white p-5 shadow-sm md:p-7">
-        <div className="mb-5 flex items-end justify-between">
-          <div>
-            <p className="text-xs font-semibold tracking-wider text-primary uppercase">Merchant Terverifikasi</p>
-            <h2 className="text-xl font-bold md:text-2xl">Toko Resmi Kampus</h2>
-          </div>
-          <Link
-            href="/toko"
-            className="btn btn-primary btn-sm rounded-full px-5"
-          >
-            Lihat semua
-          </Link>
+        <div className="mb-5">
+          <p className="text-xs font-semibold tracking-wider text-primary uppercase">Merchant Terverifikasi</p>
+          <h2 className="text-xl font-bold md:text-2xl">Toko Resmi Kampus</h2>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -127,15 +119,6 @@ export default async function HomePage() {
               <ProductCard product={p} user={user} wished={wished.has(p.id)} returnTo="/" />
             </div>
           ))}
-        </div>
-
-        <div className="mt-8 text-center">
-          <Link
-            href="/produk"
-            className="btn btn-outline rounded-full px-8 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-          >
-            Jelajahi Semua Produk
-          </Link>
         </div>
       </section>
     </div>

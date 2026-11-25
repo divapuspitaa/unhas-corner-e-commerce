@@ -39,7 +39,7 @@ export async function confirmReceived(formData) {
       msg = "Pesanan belum berstatus dikirim.";
       return;
     }
-    await changeOrderStatus(client, orderId, "selesai", user.id, "Pesanan diterima pembeli");
+    await changeOrderStatus(client, orderId, "selesai", user.id, "Pesanan diterima dan diselesaikan oleh pembeli");
   });
   redirect(msg ? withMsg("/buyer/pesanan", "err", msg) : withMsg("/buyer/pesanan", "ok", "Terima kasih! Silakan beri ulasan produk."));
 }
@@ -65,9 +65,16 @@ export async function submitReview(formData) {
   );
   if (rows.length === 0) redirect(withMsg("/buyer/pesanan", "err", "Ulasan hanya untuk produk dari pesanan yang sudah selesai."));
 
+  const existingReview = await query(
+    "SELECT 1 FROM reviews WHERE buyer_id = $1 AND product_id = $2 AND order_id = $3",
+    [user.id, productId, orderId]
+  );
+  if (existingReview.rowCount > 0) {
+    redirect(withMsg("/buyer/pesanan", "err", "Ulasan untuk produk ini sudah dikirim dan tidak dapat diubah."));
+  }
+
   await query(
-    `INSERT INTO reviews (product_id, buyer_id, order_id, rating, comment) VALUES ($1,$2,$3,$4,$5)
-     ON CONFLICT (buyer_id, product_id, order_id) DO UPDATE SET rating = EXCLUDED.rating, comment = EXCLUDED.comment`,
+    `INSERT INTO reviews (product_id, buyer_id, order_id, rating, comment) VALUES ($1,$2,$3,$4,$5)`,
     [productId, user.id, orderId, rating, comment || null]
   );
   redirect(withMsg("/buyer/pesanan", "ok", "Ulasan tersimpan."));
@@ -81,6 +88,7 @@ export async function updateOrderStatus(formData) {
   if (!isPosInt(orderId)) redirect(withMsg("/seller/pesanan", "err", "ID pesanan tidak valid."));
 
   let msg = null;
+  let alreadyDone = false;
   await withTransaction(async (client) => {
     const { rows } = await client.query(
       `SELECT o.status FROM orders o JOIN stores s ON s.id = o.store_id
@@ -91,11 +99,35 @@ export async function updateOrderStatus(formData) {
       msg = "Pesanan tidak ditemukan.";
       return;
     }
+    if (rows[0].status === status) {
+      alreadyDone = true;
+      return;
+    }
     if (!(NEXT_STATUS[rows[0].status] ?? []).includes(status)) {
       msg = "Perubahan status tidak diizinkan.";
       return;
     }
-    await changeOrderStatus(client, orderId, status, user.id, "Status diperbarui oleh seller");
+    const noteByStatus = {
+      diproses: "Pesanan diverifikasi dan sedang diproses oleh seller",
+      dikirim: "Pesanan telah dikirim oleh seller ke alamat pembeli",
+      dibatalkan: "Pesanan dibatalkan oleh seller",
+    };
+    await changeOrderStatus(
+      client,
+      orderId,
+      status,
+      user.id,
+      noteByStatus[status] ?? "Status diperbarui oleh seller"
+    );
   });
-  redirect(msg ? withMsg("/seller/pesanan", "err", msg) : withMsg("/seller/pesanan", "ok", "Status pesanan diperbarui."));
+  if (msg) redirect(withMsg("/seller/pesanan", "err", msg));
+  const okMsg =
+    status === "dikirim"
+      ? "Pesanan berhasil dikirim!"
+      : status === "diproses"
+        ? "Pesanan mulai diproses."
+        : status === "dibatalkan"
+          ? "Pesanan dibatalkan."
+          : "Status pesanan diperbarui.";
+  redirect(withMsg("/seller/pesanan", "ok", alreadyDone ? okMsg : okMsg));
 }

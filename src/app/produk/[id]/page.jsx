@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LuArrowLeft, LuChevronRight, LuMessageSquare, LuShieldAlert, LuShoppingCart, LuCreditCard } from "react-icons/lu";
+import { LuArrowLeft, LuChevronRight, LuShieldAlert, LuShoppingCart, LuCreditCard } from "react-icons/lu";
 import SafeImage from "@/components/SafeImage";
 import SubmitButton from "@/components/SubmitButton";
 import WishlistDetailButton from "@/components/WishlistDetailButton";
+import ProductReviews from "@/components/ProductReviews";
 import Stars from "@/components/Stars";
 import QuantityStepper from "@/components/QuantityStepper";
 import { Tag } from "@/components/Badge";
@@ -133,43 +134,46 @@ export default async function ProductDetailPage({ params }) {
               </p>
             </div>
           ) : canBuy ? (
-            <form action={addToCart} className="space-y-3.5 rounded-2xl border border-line bg-white p-5 shadow-xs">
-              <input type="hidden" name="productId" value={product.id} />
-              <input type="hidden" name="returnTo" value={path} />
-              <p className="text-sm font-bold text-ink">Atur Jumlah Pembelian</p>
-              <div className="flex items-center gap-3">
-                <QuantityStepper max={product.stock} />
-                <span className="text-xs font-medium text-muted">
-                  {product.stock > 0 ? `Stok tersedia: ${product.stock}` : "Stok habis"}
-                </span>
-              </div>
-              <SubmitButton
-                name="mode"
-                value="buy"
-                disabled={product.stock <= 0}
-                className="btn btn-primary w-full"
-                pendingText="Memproses..."
-              >
-                <LuCreditCard size={16} /> Beli Langsung
-              </SubmitButton>
-              <SubmitButton
-                name="mode"
-                value="cart"
-                disabled={product.stock <= 0}
-                className="btn btn-outline w-full"
-                pendingText="Memproses..."
-              >
-                <LuShoppingCart size={16} /> Tambah ke Keranjang
-              </SubmitButton>
-            </form>
+            <div className="space-y-3 rounded-2xl border border-line bg-white p-5 shadow-xs">
+              <form action={addToCart} className="space-y-3.5">
+                <input type="hidden" name="productId" value={product.id} />
+                <input type="hidden" name="returnTo" value={path} />
+                <p className="text-sm font-bold text-ink">Atur Jumlah Pembelian</p>
+                <div className="flex items-center gap-3">
+                  <QuantityStepper max={product.stock} />
+                  <span className="text-xs font-medium text-muted">
+                    {product.stock > 0 ? `Stok tersedia: ${product.stock}` : "Stok habis"}
+                  </span>
+                </div>
+                <SubmitButton
+                  name="mode"
+                  value="buy"
+                  disabled={product.stock <= 0}
+                  className="btn btn-primary w-full"
+                  pendingText="Memproses..."
+                >
+                  <LuCreditCard size={16} /> Beli Langsung
+                </SubmitButton>
+                <SubmitButton
+                  name="mode"
+                  value="cart"
+                  disabled={product.stock <= 0}
+                  className="btn btn-outline w-full"
+                  pendingText="Memproses..."
+                >
+                  <LuShoppingCart size={16} /> Tambah ke Keranjang
+                </SubmitButton>
+              </form>
+              {user?.role === "buyer" && (
+                <div className="border-t border-line/70 pt-3">
+                  <WishlistDetailButton productId={product.id} initialWished={isWished} />
+                </div>
+              )}
+            </div>
           ) : (
             <div className="rounded-2xl border border-line bg-white p-4 text-sm text-muted shadow-xs">
               Pembelian hanya tersedia untuk akun Mahasiswa (Buyer).
             </div>
-          )}
-
-          {user?.role === "buyer" && (
-            <WishlistDetailButton productId={product.id} initialWished={isWished} />
           )}
 
           {!user && isStoreActive && (
@@ -184,35 +188,12 @@ export default async function ProductDetailPage({ params }) {
       </div>
 
       {/* Ulasan Pembeli */}
-      <section className="mt-8 rounded-2xl border border-line bg-white p-5 shadow-xs">
-        <h2 className="text-lg font-bold text-ink">Ulasan Pembeli ({reviews.length})</h2>
-        <div className="mt-4 space-y-3">
-          {reviews.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-line bg-surface/40 px-4 py-8 text-center">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-soft text-primary">
-                <LuMessageSquare size={20} />
-              </span>
-              <p className="mt-2.5 text-sm font-semibold text-ink">Belum ada ulasan</p>
-              <p className="mt-0.5 text-xs text-muted">
-                Jadilah pembeli pertama yang memberikan ulasan untuk produk ini.
-              </p>
-            </div>
-          ) : (
-            reviews.map((r) => (
-              <div key={r.id} className="rounded-xl border border-line/80 bg-surface/30 p-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-bold text-ink">{r.buyer_name}</p>
-                  <span className="text-xs text-muted">{formatDate(r.created_at)}</span>
-                </div>
-                <div className="mt-1">
-                  <Stars value={r.rating} size={13} />
-                </div>
-                {r.comment && <p className="mt-2 text-sm text-ink/85">{r.comment}</p>}
-              </div>
-            ))
-          )}
-        </div>
-      </section>
+      <ProductReviews
+        reviews={reviews.map((r) => ({
+          ...r,
+          formattedDate: formatDate(r.created_at),
+        }))}
+      />
     </div>
   );
 }

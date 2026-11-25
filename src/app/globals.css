@@ -1,3 +1,4 @@
+/* Satu-satunya titik masuk Tailwind di proyek ini. Di-import sekali di src/app/layout.jsx */
 @import "tailwindcss";
 
 @theme inline {

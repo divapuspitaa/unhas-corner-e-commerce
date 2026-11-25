@@ -4,7 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LuArrowLeft, LuChevronRight } from "react-icons/lu";
 
-export default function DashboardShell({ title, links, children, showHomeLink = true }) {
+export default function DashboardShell({
+  title,
+  links,
+  children,
+  showHomeLink = true,
+  showBreadcrumbs = true,
+}) {
   const pathname = usePathname();
 
   const activeLink = links.find(
@@ -14,33 +20,35 @@ export default function DashboardShell({ title, links, children, showHomeLink = 
   );
 
   return (
-    <div className="mx-auto max-w-1480px px-4 py-6 sm:px-6 lg:px-8">
+    <div className={`mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-8 ${showBreadcrumbs ? "py-6" : "py-4"}`}>
       {/* Header Dashboard */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line/70 pb-4">
-        <div>
-          <div className="flex items-center gap-1.5 text-xs text-muted">
-            <span>{title}</span>
-            {activeLink && (
-              <>
-                <LuChevronRight size={13} />
-                <span className="font-semibold text-primary">{activeLink.label}</span>
-              </>
-            )}
+      {showBreadcrumbs ? (
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line/70 pb-4">
+          <div>
+            <div className="flex items-center gap-1.5 text-xs text-muted">
+              <span>{title}</span>
+              {activeLink && (
+                <>
+                  <LuChevronRight size={13} />
+                  <span className="font-semibold text-primary">{activeLink.label}</span>
+                </>
+              )}
+            </div>
+            <h1 className="mt-0.5 text-2xl font-bold text-ink">
+              {activeLink ? activeLink.label : title}
+            </h1>
           </div>
-          <h1 className="mt-0.5 text-2xl font-bold text-ink">
-            {activeLink ? activeLink.label : title}
-          </h1>
-        </div>
 
-        {showHomeLink && (
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-semibold text-ink transition hover:border-primary hover:bg-primary-soft hover:text-primary"
-          >
-            <LuArrowLeft size={14} /> Kembali ke Beranda
-          </Link>
-        )}
-      </div>
+          {showHomeLink && (
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-semibold text-ink transition hover:border-primary hover:bg-primary-soft hover:text-primary"
+            >
+              <LuArrowLeft size={14} /> Kembali ke Beranda
+            </Link>
+          )}
+        </div>
+      ) : null}
 
       {/* Grid Sidebar & Konten Utama */}
       <div className="grid items-start gap-5 md:grid-cols-[230px_1fr]">

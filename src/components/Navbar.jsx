@@ -27,7 +27,7 @@ export default async function Navbar() {
         : "/seller/pending";
     return (
       <header className="sticky top-0 z-40 border-b border-black/5 bg-white/75 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-1480px items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-[1480px] items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
           <Link href={home} className="shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/logo.svg" alt="UnhasCorner" className="h-9 w-auto" />
@@ -96,7 +96,7 @@ export default async function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-black/5 bg-white/75 backdrop-blur-xl transition-all">
-      <div className="mx-auto flex max-w-1480px items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[1480px] items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="shrink-0 transition-transform duration-200 hover:scale-[1.02]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/logo.svg" alt="UnhasCorner" className="h-9 w-auto" />

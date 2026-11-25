@@ -18,7 +18,9 @@ export default async function AdminProductsPage({ searchParams }) {
   const q = (sp.q ?? "").trim();
   const currentSort = SORT_OPTIONS.find(([k]) => k === sp.sort) ?? SORT_OPTIONS[0];
   const { rows } = await query(
-    `SELECT p.id, p.name, p.price, p.stock, s.name AS store_name FROM products p
+    `SELECT p.id, p.name, p.price, p.stock, s.name AS store_name,
+            EXISTS(SELECT 1 FROM order_items oi WHERE oi.product_id = p.id) AS has_orders
+     FROM products p
      JOIN stores s ON s.id = p.store_id
      WHERE p.name ILIKE $1 ORDER BY ${currentSort[2]} LIMIT 100`,
     [`%${q}%`]
@@ -44,6 +46,7 @@ export default async function AdminProductsPage({ searchParams }) {
               <th className="p-3">Toko</th>
               <th className="p-3">Harga</th>
               <th className="p-3">Stok</th>
+              <th className="p-3">Riwayat Pesanan</th>
               <th className="p-3 text-right">Aksi</th>
             </tr>
           </thead>
@@ -54,11 +57,33 @@ export default async function AdminProductsPage({ searchParams }) {
                 <td className="p-3 text-muted">{p.store_name}</td>
                 <td className="p-3">{formatRupiah(p.price)}</td>
                 <td className="p-3">{p.stock}</td>
+                <td className="p-3">
+                  {p.has_orders ? (
+                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                      Pernah dipesan
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs text-muted">
+                      Belum pernah dipesan
+                    </span>
+                  )}
+                </td>
                 <td className="p-3 text-right">
-                  <form action={adminDeleteProduct}>
-                    <input type="hidden" name="id" value={p.id} />
-                    <ConfirmButton message={`Hapus produk "${p.name}" dari platform?`}>Hapus</ConfirmButton>
-                  </form>
+                  {p.has_orders ? (
+                    <button
+                      type="button"
+                      disabled
+                      title="Produk yang memiliki riwayat pesanan tidak dapat dihapus"
+                      className="btn btn-sm cursor-not-allowed border border-line bg-surface text-muted opacity-70"
+                    >
+                      Terkunci
+                    </button>
+                  ) : (
+                    <form action={adminDeleteProduct}>
+                      <input type="hidden" name="id" value={p.id} />
+                      <ConfirmButton message={`Hapus produk "${p.name}" dari platform?`}>Hapus</ConfirmButton>
+                    </form>
+                  )}
                 </td>
               </tr>
             ))}

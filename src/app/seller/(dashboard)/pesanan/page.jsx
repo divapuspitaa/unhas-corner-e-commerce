@@ -1,5 +1,7 @@
 import { StatusBadge } from "@/components/Badge";
 import OrderTabs, { filterOrders } from "@/components/OrderTabs";
+import OrderTimeline from "@/components/OrderTimeline";
+import SubmitButton from "@/components/SubmitButton";
 import { requireApprovedSeller } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { ACTIVE_ORDER_STATUSES, NEXT_STATUS, ORDER_STATUS, formatDate, formatRupiah } from "@/lib/format";
@@ -26,7 +28,14 @@ export default async function SellerOrdersPage({ searchParams }) {
   };
   const orders = filterOrders(allOrders, tab, ACTIVE_ORDER_STATUSES);
   const ids = orders.map((o) => o.id);
-  const items = ids.length ? (await query("SELECT * FROM order_items WHERE order_id = ANY($1) ORDER BY id", [ids])).rows : [];
+  const [itemsRes, logsRes] = ids.length
+    ? await Promise.all([
+        query("SELECT * FROM order_items WHERE order_id = ANY($1) ORDER BY id", [ids]),
+        query("SELECT * FROM order_status_logs WHERE order_id = ANY($1) ORDER BY created_at, id", [ids]),
+      ])
+    : [{ rows: [] }, { rows: [] }];
+  const items = itemsRes.rows;
+  const logs = logsRes.rows;
 
   return (
     <div className="space-y-4">
@@ -47,28 +56,48 @@ export default async function SellerOrdersPage({ searchParams }) {
             </div>
             <StatusBadge status={o.status} />
           </div>
-          <div className="space-y-1 p-4 text-sm">
-            {items.filter((i) => i.order_id === o.id).map((i) => (
-              <div key={i.id} className="flex justify-between">
-                <span>{i.product_name} × {i.quantity}</span>
-                <span className="text-muted">{formatRupiah(i.subtotal)}</span>
-              </div>
-            ))}
-            <p className="pt-2 text-xs text-muted">
-              Kirim ke: {o.shipping_recipient} ({o.shipping_phone}), {o.shipping_address}
-            </p>
-            {o.note && <p className="text-xs text-muted">Catatan: {o.note}</p>}
+          <div className="space-y-3 p-4 text-sm">
+            <div className="space-y-1">
+              {items.filter((i) => i.order_id === o.id).map((i) => (
+                <div key={i.id} className="flex justify-between">
+                  <span>{i.product_name} × {i.quantity}</span>
+                  <span className="text-muted">{formatRupiah(i.subtotal)}</span>
+                </div>
+              ))}
+              <p className="pt-2 text-xs text-muted">
+                Kirim ke: {o.shipping_recipient} ({o.shipping_phone}), {o.shipping_address}
+              </p>
+              {o.note && <p className="text-xs text-muted">Catatan: {o.note}</p>}
+            </div>
+
+            <OrderTimeline
+              status={o.status}
+              logs={logs.filter((l) => l.order_id === o.id)}
+            />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line p-4">
             <p className="font-bold text-primary">{formatRupiah(o.total_price)}</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {o.status === "dikirim" && (
+                <span className="rounded-full bg-status-shipping-bg px-3 py-1 text-xs font-medium text-status-shipping-text">
+                  Sedang dikirim ke pembeli
+                </span>
+              )}
+              {o.status === "selesai" && (
+                <span className="rounded-full bg-status-success-bg px-3 py-1 text-xs font-medium text-status-success-text">
+                  Pesanan telah diterima &amp; diselesaikan oleh pembeli
+                </span>
+              )}
               {NEXT_STATUS[o.status].map((s) => (
-                <form key={s} action={updateOrderStatus}>
+                <form key={`${o.id}-${o.status}-${s}`} action={updateOrderStatus}>
                   <input type="hidden" name="orderId" value={o.id} />
                   <input type="hidden" name="status" value={s} />
-                  <button className={s === "dibatalkan" ? "btn btn-danger btn-sm" : "btn btn-primary btn-sm"}>
+                  <SubmitButton
+                    className={s === "dibatalkan" ? "btn btn-danger btn-sm" : "btn btn-primary btn-sm"}
+                    pendingText="Memproses..."
+                  >
                     {s === "dibatalkan" ? "Batalkan" : `Tandai ${ORDER_STATUS[s].label}`}
-                  </button>
+                  </SubmitButton>
                 </form>
               ))}
             </div>

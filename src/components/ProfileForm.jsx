@@ -21,10 +21,6 @@ export default function ProfileForm({ user }) {
         <label className="label" htmlFor="phone">Telepon</label>
         <input id="phone" name="phone" defaultValue={user.phone ?? ""} className="input" />
       </div>
-      <div>
-        <label className="label" htmlFor="newPassword">Password baru (kosongkan jika tidak diganti)</label>
-        <input id="newPassword" name="newPassword" type="password" minLength={6} className="input" />
-      </div>
       <SubmitButton>Simpan Perubahan</SubmitButton>
     </form>
   );

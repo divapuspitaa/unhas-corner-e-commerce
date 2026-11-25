@@ -7,6 +7,7 @@ export default async function SellerLayout({ children }) {
     <DashboardShell
       title="Dashboard Toko"
       showHomeLink={false}
+      showBreadcrumbs={false}
       links={[
         { href: "/seller/dashboard", label: "Dashboard" },
         { href: "/seller/toko", label: "Informasi Toko" },

@@ -10,20 +10,25 @@ import {
   LuArrowRight,
   LuCircleCheck,
   LuUserCheck,
+  LuTriangleAlert,
 } from "react-icons/lu";
 import { query } from "@/lib/db";
+import { analyzeSellerVerification, ensureSellerVerificationColumns } from "@/lib/sellerVerification";
 
 export const metadata = { title: "Dashboard Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminHome() {
-  await query(`
-    ALTER TABLE users
-    ADD COLUMN IF NOT EXISTS reactivation_requested_at TIMESTAMPTZ,
-    ADD COLUMN IF NOT EXISTS reactivation_reason TEXT
-  `);
+  await Promise.all([
+    query(`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS reactivation_requested_at TIMESTAMPTZ,
+      ADD COLUMN IF NOT EXISTS reactivation_reason TEXT
+    `),
+    ensureSellerVerificationColumns(),
+  ]);
 
-  const [{ rows }, { rows: pendingList }, { rows: reactivationList }] = await Promise.all([
+  const [{ rows }, { rows: pendingListRaw }, { rows: reactivationList }] = await Promise.all([
     query(`
       SELECT
         (SELECT COUNT(*) FROM users WHERE role = 'buyer' AND is_active IS NOT FALSE)::int AS buyers,
@@ -32,12 +37,13 @@ export default async function AdminHome() {
         (SELECT COUNT(*) FROM products)::int AS products,
         (SELECT COUNT(*) FROM orders)::int AS orders`),
     query(`
-      SELECT u.id, u.name, u.email, s.name AS store_name
+      SELECT u.id, u.name, u.email, u.nik, u.ktp_image_url, u.selfie_image_url,
+             u.ktp_blur_score, u.selfie_blur_score, s.name AS store_name
       FROM users u
       LEFT JOIN stores s ON s.user_id = u.id
       WHERE u.role = 'seller' AND u.seller_status = 'pending'
       ORDER BY u.id DESC
-      LIMIT 5`),
+      LIMIT 10`),
     query(`
       SELECT id, name, email, role, reactivation_reason
       FROM users
@@ -45,6 +51,14 @@ export default async function AdminHome() {
       ORDER BY reactivation_requested_at DESC
       LIMIT 5`),
   ]);
+
+  const pendingList = await Promise.all(
+    pendingListRaw.map(async (seller) => ({
+      ...seller,
+      issues: await analyzeSellerVerification(seller),
+    }))
+  );
+  const flaggedSellers = pendingList.filter((seller) => seller.issues.length > 0);
 
   const s = rows[0];
   const stats = [
@@ -95,6 +109,44 @@ export default async function AdminHome() {
           </Link>
         ))}
       </div>
+
+      {flaggedSellers.length > 0 && (
+        <div className="card border-red-300 bg-red-50/60 p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 font-bold text-red-900">
+              <LuTriangleAlert size={18} className="text-red-600" />
+              Peringatan Data Pendaftar Seller ({flaggedSellers.length})
+            </h3>
+            <Link
+              href="/admin/verifikasi"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            >
+              Periksa di Verifikasi <LuArrowRight size={13} />
+            </Link>
+          </div>
+          <div className="divide-y divide-red-200/70">
+            {flaggedSellers.map((seller) => (
+              <div
+                key={seller.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-2.5 first:pt-1 last:pb-1"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-ink">
+                    {seller.store_name || "Toko Belum Bernama"}{" "}
+                    <span className="text-xs font-normal text-muted">({seller.name})</span>
+                  </p>
+                  <p className="mt-0.5 text-xs font-medium text-red-700">
+                    {seller.issues.join(" · ")}
+                  </p>
+                </div>
+                <Link href="/admin/verifikasi" className="btn btn-danger btn-sm rounded-full">
+                  Tinjau Data
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {reactivationList.length > 0 && (
         <div className="card border-amber-300 bg-amber-50/40 p-5">
@@ -173,6 +225,12 @@ export default async function AdminHome() {
                   <p className="text-xs text-muted">
                     Pengelola: {seller.name} ({seller.email})
                   </p>
+                  {seller.issues.length > 0 && (
+                    <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-amber-700">
+                      <LuTriangleAlert size={12} className="shrink-0" />
+                      {seller.issues.join(" · ")}
+                    </p>
+                  )}
                 </div>
                 <Link href="/admin/verifikasi" className="btn btn-outline btn-sm rounded-full">
                   Tinjau Pengajuan

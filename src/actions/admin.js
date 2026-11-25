@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { query } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { withMsg } from "@/lib/flash";
+import { analyzeSellerVerification, ensureSellerVerificationColumns } from "@/lib/sellerVerification";
 
 const isPosInt = (n) => Number.isInteger(n) && n > 0;
 
@@ -18,17 +19,53 @@ async function ensureReactivationColumns() {
 // ---------- Verifikasi seller ----------
 export async function setSellerStatus(formData) {
   await requireUser("admin");
+  await ensureSellerVerificationColumns();
   const id = Number(formData.get("userId"));
   const status = String(formData.get("status"));
-  if (!isPosInt(id) || !["approved", "rejected", "pending"].includes(status)) {
+  const inputReason = String(formData.get("rejectionReason") ?? "").trim();
+  if (!isPosInt(id) || !["approved", "rejected"].includes(status)) {
     redirect(withMsg("/admin/verifikasi", "err", "Data verifikasi tidak valid."));
   }
 
-  await query(
-    "UPDATE users SET seller_status = $1, updated_at = NOW() WHERE id = $2 AND role = 'seller'",
-    [status, id]
+  const { rows } = await query(
+    `SELECT seller_status, nik, ktp_image_url, selfie_image_url, ktp_blur_score, selfie_blur_score
+     FROM users WHERE id = $1 AND role = 'seller'`,
+    [id]
   );
-  redirect(withMsg("/admin/verifikasi", "ok", `Seller ditandai ${status}.`));
+  if (!rows[0]) {
+    redirect(withMsg("/admin/verifikasi", "err", "Akun seller tidak ditemukan."));
+  }
+  if (rows[0].seller_status === "rejected") {
+    redirect(
+      withMsg(
+        "/admin/verifikasi",
+        "err",
+        "Seller yang sudah ditolak tidak dapat di-approve lagi. Seller harus mendaftar ulang dari awal."
+      )
+    );
+  }
+
+  let rejectionReason = null;
+  if (status === "rejected") {
+    const autoIssues = await analyzeSellerVerification(rows[0]);
+    rejectionReason =
+      inputReason ||
+      (autoIssues.length > 0
+        ? autoIssues.join("; ")
+        : "Data identitas yang diajukan belum memenuhi syarat verifikasi.");
+  }
+
+  await query(
+    "UPDATE users SET seller_status = $1, rejection_reason = $2, updated_at = NOW() WHERE id = $3 AND role = 'seller'",
+    [status, rejectionReason, id]
+  );
+  redirect(
+    withMsg(
+      "/admin/verifikasi",
+      "ok",
+      status === "approved" ? "Seller disetujui." : "Seller ditolak permanen."
+    )
+  );
 }
 
 // ---------- Manajemen user ----------
@@ -196,6 +233,20 @@ export async function adminDeleteProduct(formData) {
   await requireUser("admin");
   const id = Number(formData.get("id"));
   if (!isPosInt(id)) redirect(withMsg("/admin/produk", "err", "ID produk tidak valid."));
+
+  const { rows: ordered } = await query(
+    "SELECT 1 FROM order_items WHERE product_id = $1 LIMIT 1",
+    [id]
+  );
+  if (ordered.length > 0) {
+    redirect(
+      withMsg(
+        "/admin/produk",
+        "err",
+        "Produk tidak dapat dihapus karena sudah memiliki riwayat pesanan (sedang diproses atau sudah pernah dibeli)."
+      )
+    );
+  }
 
   await query("DELETE FROM products WHERE id = $1", [id]);
   redirect(withMsg("/admin/produk", "ok", "Produk dihapus."));

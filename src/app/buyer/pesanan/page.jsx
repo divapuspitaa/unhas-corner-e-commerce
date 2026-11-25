@@ -4,6 +4,7 @@ import ReviewForm from "@/components/ReviewForm";
 import SafeImage from "@/components/SafeImage";
 import { StatusBadge } from "@/components/Badge";
 import OrderTabs, { filterOrders } from "@/components/OrderTabs";
+import OrderTimeline from "@/components/OrderTimeline";
 import { requireUser } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { ACTIVE_ORDER_STATUSES, formatDate, formatRupiah } from "@/lib/format";
@@ -75,12 +76,19 @@ export default async function BuyerOrdersPage({ searchParams }) {
                     <p className="text-sm font-semibold">{formatRupiah(i.subtotal)}</p>
                   </div>
                   {o.status === "selesai" && i.product_id && (
-                    <details className="mt-2">
-                      <summary className="cursor-pointer text-xs font-semibold text-primary">
-                        {rv ? `Ulasanmu: ${rv.rating}★ (ubah)` : "Beri ulasan"}
-                      </summary>
-                      <ReviewForm orderId={o.id} productId={i.product_id} initialRating={rv?.rating ?? 0} initialComment={rv?.comment ?? ""} />
-                    </details>
+                    rv ? (
+                      <div className="mt-2 rounded-lg bg-surface/70 px-3 py-2 text-xs">
+                        <p className="font-semibold text-primary">Ulasanmu: {rv.rating}★</p>
+                        {rv.comment && <p className="mt-0.5 text-muted">{rv.comment}</p>}
+                      </div>
+                    ) : (
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-xs font-semibold text-primary">
+                          Beri ulasan
+                        </summary>
+                        <ReviewForm orderId={o.id} productId={i.product_id} initialRating={0} initialComment="" />
+                      </details>
+                    )
                   )}
                 </div>
               );
@@ -90,20 +98,14 @@ export default async function BuyerOrdersPage({ searchParams }) {
           <div className="space-y-3 border-t border-line p-4 text-sm">
             <p className="text-muted"><span className="font-medium text-ink">Dikirim ke:</span> {o.shipping_recipient}, {o.shipping_address}</p>
 
-            <details>
-              <summary className="cursor-pointer text-xs font-semibold text-primary">Lacak status pesanan</summary>
-              <ol className="mt-2 space-y-1 border-l-2 border-primary-soft pl-3 text-xs">
-                {logs.rows.filter((l) => l.order_id === o.id).map((l) => (
-                  <li key={l.id}>
-                    <StatusBadge status={l.status} /> <span className="text-muted">{formatDate(l.created_at)}</span>
-                  </li>
-                ))}
-              </ol>
-            </details>
+            <OrderTimeline
+              status={o.status}
+              logs={logs.rows.filter((l) => l.order_id === o.id)}
+            />
 
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-bold text-primary">Total: {formatRupiah(o.total_price)}</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {o.status === "menunggu_pembayaran" && (
                   <form action={cancelOrder}>
                     <input type="hidden" name="orderId" value={o.id} />
@@ -111,10 +113,13 @@ export default async function BuyerOrdersPage({ searchParams }) {
                   </form>
                 )}
                 {o.status === "dikirim" && (
-                  <form action={confirmReceived}>
-                    <input type="hidden" name="orderId" value={o.id} />
-                    <button className="btn btn-primary btn-sm">Pesanan Diterima</button>
-                  </form>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-muted">Sudah terima barang dari seller?</span>
+                    <form action={confirmReceived}>
+                      <input type="hidden" name="orderId" value={o.id} />
+                      <button className="btn btn-primary btn-sm">Pesanan Diterima (Selesai)</button>
+                    </form>
+                  </div>
                 )}
               </div>
             </div>

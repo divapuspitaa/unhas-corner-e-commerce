@@ -27,6 +27,26 @@ export async function updateProfile(prevState, formData) {
   return { ok: "Profil berhasil diperbarui." };
 }
 
+export async function changePassword(prevState, formData) {
+  const user = await requireUser();
+  const currentPassword = String(formData.get("currentPassword") ?? "");
+  const newPassword = String(formData.get("newPassword") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (!currentPassword) return { error: "Password saat ini wajib diisi." };
+  if (newPassword.length < 6) return { error: "Password baru minimal 6 karakter." };
+  if (newPassword !== confirmPassword) return { error: "Konfirmasi password baru tidak sama." };
+
+  const { rows } = await query("SELECT password_hash FROM users WHERE id = $1", [user.id]);
+  if (!rows[0] || !(await bcrypt.compare(currentPassword, rows[0].password_hash))) {
+    return { error: "Password saat ini salah." };
+  }
+
+  const hash = await bcrypt.hash(newPassword, 10);
+  await query("UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2", [hash, user.id]);
+  return { ok: "Password berhasil diubah." };
+}
+
 export async function addAddress(prevState, formData) {
   const user = await requireUser("buyer");
   const label = String(formData.get("label") ?? "").trim() || "Rumah";

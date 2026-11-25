@@ -30,11 +30,11 @@ export const ORDER_STATUS = {
   dibatalkan: { label: "Dibatalkan", cls: "bg-status-danger-bg text-status-danger-text" },
 };
 
-// Alur status yang diizinkan untuk seller
+// Alur status yang diizinkan untuk seller (penyelesaian pesanan hanya oleh buyer)
 export const NEXT_STATUS = {
   menunggu_pembayaran: ["diproses", "dibatalkan"],
   diproses: ["dikirim", "dibatalkan"],
-  dikirim: ["selesai"],
+  dikirim: [],
   selesai: [],
   dibatalkan: [],
 };

@@ -3,10 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "css:build": "tailwindcss -i ./src/app/globals.css -o ./src/app/tailwind.generated.css --minify",
-    "css:watch": "tailwindcss -i ./src/app/globals.css -o ./src/app/tailwind.generated.css --watch",
-    "dev": "npm run css:build && concurrently -k -n css,next \"npm run css:watch\" \"next dev\"",
-    "build": "npm run css:build && next build",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -21,6 +19,7 @@
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.5",
+    "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/turbopack": "4.3.3",
     "concurrently": "^10.0.7",
     "eslint": "^9",

@@ -55,6 +55,7 @@ export function CategoryDropdown({ categories }) {
 
   const activeCategory = pathname === "/produk" ? searchParams.get("category") : null;
   const isProdukPage = pathname === "/produk";
+  const isCatalogPage = pathname === "/" || pathname === "/produk" || pathname.startsWith("/produk/");
 
   const clearCloseTimer = () => {
     if (closeTimeoutRef.current) {
@@ -91,6 +92,8 @@ export function CategoryDropdown({ categories }) {
       clearCloseTimer();
     };
   }, []);
+
+  if (!isCatalogPage) return null;
 
   return (
     <div
