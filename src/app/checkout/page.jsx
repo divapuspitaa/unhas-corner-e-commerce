@@ -18,7 +18,7 @@ export default async function CheckoutPage({ searchParams }) {
   if (user.role !== "buyer") redirect("/");
 
   // ?items=1,2 -> checkout hanya item tersebut. Tanpa parameter -> semua isi keranjang.
-  const rawItems = typeof sp.items === "string" ? sp.items : "";
+  const rawItems = Array.isArray(sp.items) ? sp.items.join(",") : typeof sp.items === "string" ? sp.items : "";
   const itemIds = rawItems
     ? [...new Set(rawItems.split(",").map(Number).filter((n) => Number.isInteger(n) && n > 0))]
     : null;

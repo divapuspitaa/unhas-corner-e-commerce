@@ -4,6 +4,7 @@ import { LuArrowLeft, LuTrash2, LuStore, LuShoppingBag, LuMinus, LuPlus, LuCredi
 import SafeImage from "@/components/SafeImage";
 import SubmitButton from "@/components/SubmitButton";
 import ConfirmButton from "@/components/ConfirmButton";
+import CartCheckoutPanel from "@/components/CartCheckoutPanel";
 import { getCurrentUser } from "@/lib/auth";
 import { query } from "@/lib/db";
 import { formatRupiah } from "@/lib/format";
@@ -29,13 +30,18 @@ export default async function CartPage({ searchParams }) {
     [user.id]
   );
 
-  const total = items.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
+  // Item yang bisa di-checkout: toko aktif & stok tersedia (jumlah otomatis dibatasi stok)
+  const isSelectable = (i) => i.store_active !== false && i.stock > 0;
+  const effQty = (i) => Math.min(i.quantity, i.stock);
+  const selectable = items.filter(isSelectable);
   const totalQty = items.reduce((s, i) => s + i.quantity, 0);
+  const selTotal = selectable.reduce((s, i) => s + Number(i.price) * effQty(i), 0);
+  const selQty = selectable.reduce((s, i) => s + effQty(i), 0);
   const storeNames = [...new Set(items.map((i) => i.store_name))];
-  const hasStockIssue = items.some((i) => i.store_active === false || i.stock <= 0 || i.quantity > i.stock);
+  const selStoreCount = new Set(selectable.map((i) => i.store_name)).size;
 
   return (
-    <div className="mx-auto max-w-1480px px-4 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-1480px px-4 py-6 pb-28 sm:px-6 lg:px-8 lg:pb-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line/70 pb-4">
         <div>
           <h1 className="text-2xl font-bold text-ink">Keranjang Belanja</h1>
@@ -70,6 +76,16 @@ export default async function CartPage({ searchParams }) {
       ) : (
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_360px]">
           <div className="space-y-4">
+            <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-line bg-white px-4 py-3 text-sm font-semibold text-ink shadow-xs">
+              <input
+                type="checkbox"
+                data-cart-all
+                defaultChecked={selectable.length > 0}
+                disabled={selectable.length === 0}
+                className="h-4 w-4 accent-primary"
+              />
+              Pilih semua produk ({selectable.length})
+            </label>
             {storeNames.map((store) => (
               <div key={store} className="overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
                 <p className="flex items-center gap-2 border-b border-line bg-surface/40 px-4 py-3 text-sm font-bold text-ink">
@@ -78,7 +94,21 @@ export default async function CartPage({ searchParams }) {
                 {items
                   .filter((i) => i.store_name === store)
                   .map((i) => (
-                    <div key={i.id} className="flex gap-3.5 border-b border-line p-4 last:border-0">
+                    <div key={i.id} className="flex items-start gap-3 border-b border-line p-4 last:border-0">
+                      <input
+                        type="checkbox"
+                        name="items"
+                        value={i.id}
+                        form="cart-select-form"
+                        data-cart-check
+                        data-price={Number(i.price)}
+                        data-qty={effQty(i)}
+                        data-store={i.store_name}
+                        defaultChecked={isSelectable(i)}
+                        disabled={!isSelectable(i)}
+                        aria-label={`Pilih ${i.name}`}
+                        className="mt-8 h-4 w-4 shrink-0 accent-primary"
+                      />
                       <SafeImage
                         src={i.image_url}
                         alt={i.name}
@@ -160,35 +190,12 @@ export default async function CartPage({ searchParams }) {
             ))}
           </div>
 
-          <div className="h-fit space-y-4 rounded-2xl border border-line bg-white p-5 shadow-xs lg:sticky lg:top-20">
-            <h2 className="border-b border-line/70 pb-3 text-base font-bold text-ink">
-              Ringkasan Belanja
-            </h2>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted">Total harga ({totalQty} barang)</span>
-              <span className="text-xl font-bold text-primary">{formatRupiah(total)}</span>
-            </div>
-            <p className="rounded-lg bg-surface/60 px-3 py-2 text-xs text-muted">
-              Pesanan dipecah otomatis menjadi <strong>{storeNames.length} order</strong> (satu per toko).
-            </p>
-            <p className="text-xs text-muted">
-              Checkout semua belanjaan sekaligus, atau pilih tombol <strong>Checkout</strong> di tiap produk untuk membeli satu per satu.
-            </p>
-            {hasStockIssue ? (
-              <>
-                <button type="button" disabled className="btn btn-primary w-full">
-                  Checkout Semua ({totalQty})
-                </button>
-                <p className="text-xs text-status-danger-text">
-                  Hapus produk yang stoknya habis / tokonya nonaktif untuk checkout semua, atau checkout produk lain satu per satu.
-                </p>
-              </>
-            ) : (
-              <Link href="/checkout" className="btn btn-primary w-full">
-                <LuCreditCard size={16} /> Checkout Semua ({totalQty})
-              </Link>
-            )}
-          </div>
+          <CartCheckoutPanel
+            initialCount={selQty}
+            initialTotal={selTotal}
+            storeCount={selStoreCount}
+            selectableCount={selectable.length}
+          />
         </div>
       )}
     </div>
