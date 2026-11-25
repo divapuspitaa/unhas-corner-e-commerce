@@ -23,7 +23,7 @@ export async function toggleWishlistAction(productId) {
   const productName = prodRes.rows[0]?.name || "Produk";
 
   const del = await query("DELETE FROM wishlists WHERE user_id = $1 AND product_id = $2", [user.id, id]);
-  revalidatePath("/buyer/wishlist");
+  revalidatePath("/wishlist");
 
   if (del.rowCount === 0) {
     await query("INSERT INTO wishlists (user_id, product_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", [user.id, id]);
@@ -44,7 +44,7 @@ export async function toggleWishlistAction(productId) {
 export async function toggleWishlist(formData) {
   const user = await requireUser("buyer");
   const productId = Number(formData.get("productId"));
-  const returnTo = safePath(String(formData.get("returnTo") ?? ""), "/buyer/wishlist");
+  const returnTo = safePath(String(formData.get("returnTo") ?? ""), "/wishlist");
   if (!Number.isInteger(productId) || productId <= 0) redirect(returnTo);
 
   const del = await query("DELETE FROM wishlists WHERE user_id = $1 AND product_id = $2", [user.id, productId]);

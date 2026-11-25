@@ -69,7 +69,7 @@ export default async function Navbar() {
       { href: "/keranjang", label: "Keranjang" },
       { href: "/buyer/dashboard", label: "Dashboard" },
       { href: "/buyer/pesanan", label: "Pesanan Saya" },
-      { href: "/buyer/wishlist", label: "Wishlist" },
+      { href: "/wishlist", label: "Wishlist" },
       { href: "/buyer/profil", label: "Profil" }
     );
   }

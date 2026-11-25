@@ -56,7 +56,7 @@ export default function WishlistButton({ productId, initialWished = false }) {
         })
       );
 
-      if (pathname === "/buyer/wishlist") {
+      if (pathname === "/wishlist") {
         router.refresh();
       }
     });

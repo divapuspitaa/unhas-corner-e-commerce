@@ -166,9 +166,9 @@ export function CategoryDropdown({ categories }) {
 export function DesktopNavLinks({ user, cartCount, dashboardHref }) {
   const pathname = usePathname();
 
-  const isWishlist = pathname === "/buyer/wishlist" || pathname.startsWith("/buyer/wishlist/");
+  const isWishlist = pathname === "/wishlist" || pathname.startsWith("/wishlist/");
   const isCart = pathname === "/keranjang" || pathname === "/checkout";
-  const isBuyerArea = pathname.startsWith("/buyer") && !isWishlist;
+  const isBuyerArea = pathname.startsWith("/buyer");
   const isStaffArea = pathname.startsWith("/seller") || pathname.startsWith("/admin");
   const isLogin = pathname === "/login";
   const isRegister = pathname === "/register";
@@ -183,7 +183,7 @@ export function DesktopNavLinks({ user, cartCount, dashboardHref }) {
     <>
       {user?.role === "buyer" && (
         <Link
-          href="/buyer/wishlist"
+          href="/wishlist"
           aria-label="Wishlist"
           aria-current={isWishlist ? "page" : undefined}
           title="Wishlist"

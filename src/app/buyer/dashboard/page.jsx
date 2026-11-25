@@ -39,7 +39,7 @@ export default async function BuyerDashboard() {
     { label: "Item di Keranjang", value: s.cart, href: "/keranjang", icon: LuShoppingCart },
     { label: "Pesanan Berjalan", value: s.active, href: "/buyer/pesanan?tab=berjalan", icon: LuClock },
     { label: "Total Pesanan", value: s.orders, href: "/buyer/pesanan", icon: LuPackageCheck },
-    { label: "Produk Wishlist", value: s.wishlist, href: "/buyer/wishlist", icon: LuHeart },
+    { label: "Produk Wishlist", value: s.wishlist, href: "/wishlist", icon: LuHeart },
   ];
 
   return (

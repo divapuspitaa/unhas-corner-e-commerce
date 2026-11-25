@@ -38,7 +38,7 @@ export async function middleware(request) {
   let needed = null;
   if (pathname.startsWith("/admin")) needed = "admin";
   else if (pathname.startsWith("/seller")) needed = "seller";
-  else if (pathname.startsWith("/buyer") || pathname === "/keranjang" || pathname === "/checkout") needed = "buyer";
+  else if (pathname.startsWith("/buyer") || pathname === "/keranjang" || pathname === "/checkout" || pathname === "/wishlist") needed = "buyer";
 
   // Sudah login tetapi salah role -> tampilkan halaman 403 Forbidden
   if (needed && role !== needed) {
@@ -55,6 +55,7 @@ export const config = {
     "/toko/:path*",
     "/dashboard",
     "/keranjang",
+    "/wishlist",
     "/checkout",
     "/admin/:path*",
     "/seller/:path*",
