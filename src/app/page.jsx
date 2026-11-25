@@ -3,7 +3,7 @@ import { LuStore } from "react-icons/lu";
 import HeroBanner from "@/components/HeroBanner";
 import ProductCard from "@/components/ProductCard";
 import { getCurrentUser } from "@/lib/auth";
-import { getCategories, getStores, getWishlistIds, randomProducts, topProducts } from "@/lib/queries";
+import { TOP_MIN_RATING, TOP_MIN_REVIEWS, getCategories, getStores, getWishlistIds, randomProducts, topProducts } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -16,12 +16,12 @@ export default async function HomePage() {
     getStores(),
     getWishlistIds(user?.role === "buyer" ? user.id : null),
   ]);
-  // Produk terlaris = urut dari jumlah terjual terbanyak (hanya yang sudah pernah terjual)
-  const bestSellers = top.filter((p) => p.sold_count > 0);
+  // Produk terlaris = rating tinggi + ulasan banyak (kriteria ada di lib/queries.js)
+  const bestSellers = top;
   const hasSales = bestSellers.length > 0;
 
   return (
-    <div className="mx-auto max-w-1480px space-y-8 px-4 pt-5 pb-2 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[1480px] space-y-8 px-4 pt-5 pb-2 sm:px-6 lg:px-8">
       {/* Hero Banner sejajar lurus dengan batas kiri-kanan Navbar */}
       <HeroBanner />
 
@@ -33,8 +33,9 @@ export default async function HomePage() {
             <div>
               <h2 className="text-xl font-bold text-white md:text-2xl">Produk Terlaris</h2>
               <p className="mt-1 text-xs text-white/85 md:text-sm">
-                Diurutkan berdasarkan <strong className="text-accent">jumlah terjual terbanyak</strong> (dari pesanan yang
-                sudah selesai). Jika jumlah terjual sama, produk dengan rating lebih tinggi (skala 1–5) tampil lebih dulu.
+                Dipilih berdasarkan <strong className="text-accent">rating tinggi</strong> dan{" "}
+                <strong className="text-accent">ulasan terbanyak</strong> dari pembeli (minimal {TOP_MIN_REVIEWS} ulasan dan rating{" "}
+                {TOP_MIN_RATING.toFixed(1)}/5 ke atas). Makin tinggi rating dan makin banyak ulasan, makin atas urutannya.
               </p>
             </div>
             <Link
@@ -45,7 +46,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="relative flex snap-x snap-mandatory no-scrollbar gap-3.5 overflow-x-auto pb-2">
+          <div className="relative flex snap-x snap-mandatory no-scrollbar flex gap-3.5 overflow-x-auto pb-2">
             {bestSellers.map((p, idx) => (
               <div
                 key={p.id}

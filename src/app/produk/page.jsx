@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 const SORT_OPTIONS = [
   ["terbaru", "Terbaru"],
-  ["terlaris", "Terlaris"],
+  ["terlaris", "Terlaris (rating & ulasan)"],
   ["termurah", "Harga Terendah"],
   ["termahal", "Harga Tertinggi"],
   ["rating", "Rating Tertinggi"],

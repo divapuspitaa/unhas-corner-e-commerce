@@ -20,13 +20,22 @@ const PRODUCT_SELECT = `
     GROUP BY oi.product_id
   ) sd ON sd.product_id = p.id`;
 
+// Kriteria PRODUK TERLARIS (berdasarkan ulasan & rating, bukan jumlah terjual):
+//  - minimal TOP_MIN_REVIEWS ulasan dan rata-rata rating minimal TOP_MIN_RATING (skala 1-5)
+//  - skor = rata-rata rating yang "ditarik" ke nilai prior (4.0) supaya produk dengan 1-2 ulasan
+//    tidak mengalahkan produk yang ulasannya banyak:  (n * rata2 + 3 * 4.0) / (n + 3)
+//  Rumus yang sama dipakai oleh view v_produk_terlaris di database/schema-unhas-corner.sql
+export const TOP_MIN_REVIEWS = 3;
+export const TOP_MIN_RATING = 4.0;
+const TOP_SCORE_SQL = "((COALESCE(r.review_count,0) * COALESCE(r.avg_rating,0) + 3 * 4.0) / (COALESCE(r.review_count,0) + 3))";
+
 const SORTS = {
   terbaru: "p.id DESC",
   termurah: "p.price ASC, p.id DESC",
   termahal: "p.price DESC, p.id DESC",
   nama: "p.name ASC",
   rating: "avg_rating DESC, review_count DESC",
-  terlaris: "sold_count DESC, p.id DESC",
+  terlaris: `${TOP_SCORE_SQL} DESC, review_count DESC, sold_count DESC, p.id DESC`,
 };
 
 export const PAGE_SIZE = 12;
@@ -83,11 +92,14 @@ export async function randomProducts(limit = 8) {
   return rows;
 }
 
-// Produk terlaris untuk homepage
+// Produk terlaris untuk homepage (rating tinggi + ulasan banyak)
 export async function topProducts(limit = 10) {
   const { rows } = await query(
-    `${PRODUCT_SELECT} WHERE u.is_active = true AND p.stock > 0 ORDER BY sold_count DESC, avg_rating DESC, p.id DESC LIMIT $1`,
-    [limit]
+    `${PRODUCT_SELECT}
+     WHERE u.is_active = true AND p.stock > 0
+       AND COALESCE(r.review_count,0) >= $2 AND r.avg_rating >= $3
+     ORDER BY ${TOP_SCORE_SQL} DESC, review_count DESC, sold_count DESC, p.id DESC LIMIT $1`,
+    [limit, TOP_MIN_REVIEWS, TOP_MIN_RATING]
   );
   return rows;
 }
