@@ -25,10 +25,6 @@ export default async function LoginPage({ searchParams }) {
         <h1 className="text-2xl font-bold">Masuk ke UnhasCorner</h1>
         <p className="mb-5 mt-1 text-sm text-muted">Masuk sebagai Buyer, Seller, atau Admin.</p>
         <LoginForm next={sp.next} />
-        <div className="mt-5 rounded-lg bg-accent-soft p-3 text-xs text-muted">
-          <p className="font-semibold text-ink">Akun contoh (password: password123)</p>
-          <p>admin@unhascorner.id · hadin@unhascorner.id · andi@student.unhas.ac.id · pending@unhascorner.id</p>
-        </div>
       </div>
     </div>
   );
