@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="public/images/logo.svg" alt="Logo UnhasCorner" width="120" />
+
 # UnhasCorner
 
 > Platform E-Commerce Resmi Kampus Universitas Hasanuddin — Menghubungkan Mahasiswa dengan Merchant & Koperasi Kampus Terverifikasi.
@@ -156,6 +158,42 @@ unhas-corner/
 </details>
 
 ---
+
+## Demo Accounts
+
+Berikut daftar akun pengujian yang tersedia di database (akun ID 1–16 berasal dari data seed dengan password yang sama, sedangkan akun ID 17 merupakan akun uji registrasi manual):
+
+### Admin
+
+| ID | Nama | Email | No. Telepon | Status | Password |
+| :-: | :--- | :--- | :--- | :--- | :--- |
+| 1 | Admin UnhasCorner | `admin@unhascorner.id` | `081200000001` | Aktif | Password default seed |
+
+### Seller (Pengelola Toko)
+
+| ID | Nama | Email | No. Telepon | Status Seller | Password |
+| :-: | :--- | :--- | :--- | :--- | :--- |
+| 2 | Seller Hadin | `hadin@unhascorner.id` | `081200000002` | `approved` | Password default seed |
+| 3 | Seller SEMA | `sema@unhascorner.id` | `081200000003` | `approved` | Password default seed |
+| 4 | Seller Oxi | `oxi@unhascorner.id` | `081200000004` | `approved` | Password default seed |
+| 5 | Seller Kopma | `kopma@unhascorner.id` | `081200000005` | `approved` | Password default seed |
+| 6 | Seller Sumber Rezeki | `sumberrezeki@unhascorner.id` | `081200000006` | `approved` | Password default seed |
+| 7 | Seller Aesculapius | `aesculapius@unhascorner.id` | `081200000007` | `approved` | Password default seed |
+| 8 | Calon Seller Pending | `pending@unhascorner.id` | `081200000008` | `pending` | Password default seed |
+| 9 | Calon Seller Ditolak | `rejected@unhascorner.id` | `081200000009` | `rejected` | Password default seed |
+| 14 | Seller Maba Mart | `mabamart@unhascorner.id` | `081200000010` | `approved` | Password default seed |
+| 15 | Seller Lab Corner | `labcorner@unhascorner.id` | `081200000011` | `approved` | Password default seed |
+| 17 | bibi | `bibi@unhascorner.id` | `082874373373` | `rejected` | Password registrasi manual |
+
+### Buyer (Pembeli)
+
+| ID | Nama | Email | No. Telepon | Status | Password |
+| :-: | :--- | :--- | :--- | :--- | :--- |
+| 10 | Andi Rahman | `andi@student.unhas.ac.id` | `081300000001` | Aktif | Password default seed |
+| 11 | Siti Nurhaliza | `siti@student.unhas.ac.id` | `081300000002` | Aktif | Password default seed |
+| 12 | Muh. Fadil | `fadil@student.unhas.ac.id` | `081300000003` | Aktif | Password default seed |
+| 13 | Rina Kartika | `rina@student.unhas.ac.id` | `081300000004` | Aktif | Password default seed |
+| 16 | Nurul Aini | `nurul@student.unhas.ac.id` | `081300000005` | Aktif | Password default seed |
 
 ## Contributing
 
